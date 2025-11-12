@@ -1,51 +1,61 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using MyApp.Application.Helper;
 using MyApp.Application.UseCases.User;
 using MyApp.Application.Validators;
 using MyApp.Domain.Interfaces;
-using MyApp.Domain.Interfaces.Common;
 using MyApp.Domain.Interfaces.Services;
 using MyApp.Infrastructure;
 using MyApp.Infrastructure.Repositories;
-using MyApp.Infrastructure.Repositories.Common;
 using MyApp.Infrastructure.Services;
 using MyApp.Infrastructure.Settings;
 using System.Text;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllers();
+
+builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDb"));
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var settings = sp.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+    var clientSettings = MongoClientSettings.FromConnectionString(settings.ConnectionString);
+    return new MongoClient(clientSettings);
+});
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
 
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
-builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDb"));
-
-builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 
 builder.Services.AddSingleton<MongoMapping>();
-builder.Services.AddSingleton<MongoIndexing>();
-
-
-builder.Services.AddScoped(typeof(IRepository<>), typeof(MongoRepository<>));
+builder.Services.AddSingleton<MongoIndexing>(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    var settings = sp.GetRequiredService<MongoDbSettings>();
+    return new MongoIndexing(client, settings);
+});
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ILogRepository, LogRepository>();
 builder.Services.AddScoped<IContactMessageRepository, ContactMessageRepository>();
 
+
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
+
 builder.Services.AddScoped<LoginUserUseCase>();
 builder.Services.AddScoped<RefreshTokenUseCase>();
 builder.Services.AddScoped<GetCurrentUserUseCase>();
+builder.Services.AddScoped<SeedAdminUseCase>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<UserLoginDtoValidator>();
-
-builder.Services.AddHttpClient();
-
 builder.Services.AddAutoMapper(typeof(MyApp.Application.MappingProfile));
+
+//builder.Services.AddHttpClient();
+builder.Services.AddHostedService<MongoDbInitializer>();
 
 // تنظیم احراز هویت JWT
 builder.Services.AddAuthentication(options =>
@@ -64,7 +74,7 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Secret"])),
-        ClockSkew = TimeSpan.FromSeconds(30) 
+        ClockSkew = TimeSpan.Zero
     };
 
     // مدیریت خطاها و لاگ
@@ -130,14 +140,11 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
-
-
-var mapping = app.Services.GetRequiredService<MongoMapping>();
-mapping.RegisterMappings();
-
-var indexing = app.Services.GetRequiredService<MongoIndexing>();
-indexing.RegisterIndexing();
 
 //app.UseMiddleware<RequestLoggingMiddleware>();
 
@@ -146,8 +153,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseHttpsRedirection();
+}
 
-//app.UseHttpsRedirection();
 app.UseCors("AllowMvc");
 app.UseAuthentication();
 app.UseAuthorization();

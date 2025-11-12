@@ -12,7 +12,7 @@ namespace MyApp.Infrastructure
       
         public void RegisterMappings()
         {
-            BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.ObjectId));
+            BsonSerializer.RegisterSerializer(typeof(Guid), new GuidSerializer(GuidRepresentation.Standard));
             BsonSerializer.RegisterSerializer(new DateTimeSerializer(DateTimeKind.Utc));
 
             Register<User>();
@@ -34,7 +34,7 @@ namespace MyApp.Infrastructure
             var cm = new BsonClassMap<T>();
             cm.AutoMap();
             cm.MapIdProperty(x => ((IHasId<Guid>)x).Id)
-              .SetSerializer(new GuidSerializer(BsonType.ObjectId));
+                .SetSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
             BsonClassMap.RegisterClassMap(cm);
         }
