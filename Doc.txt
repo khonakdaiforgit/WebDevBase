@@ -1,0 +1,3 @@
+ Migration Commmand
+ dotnet ef migrations add Init --project C:\Source\LinkSafe\LinkSafe\MyApp.Infrastructure --startup-project C:\Source\LinkSafe\LinkSafe\MyApp.WebAPI
+ dotnet ef database update --project C:\Source\LinkSafe\LinkSafe\MyApp.Infrastructure --startup-project C:\Source\LinkSafe\LinkSafe\MyApp.WebAPI

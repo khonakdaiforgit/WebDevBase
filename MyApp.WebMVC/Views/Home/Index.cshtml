@@ -1,0 +1,105 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!-- Hero Section -->
+<div class="text-center py-5 " data-aos="fade-up">
+    <div class="d-flex justify-content-center align-items-center pt-lg-5">
+
+        <img src="~/img/CryptoFile_With.png" alt="Crypto File Logo for Anonymous File Trading" class="img-fluid" style="max-width: 400px; padding:0 30px">
+    </div>
+    <h1 class="display-4 mt-3">Sell Files Anonymously with USDT</h1>
+    <p class="lead text-muted">No personal info needed. Set your price, share your link, and get paid instantly with only a 2% fee.</p>
+    <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg mt-3  " style="border-radius:3rem">Start Selling Now</a>
+</div>
+
+<!-- How It Works Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">How It Works</h2>
+        <div class="row text-center">
+            <div class="col-md-3" data-aos="fade-right">
+                <i class="fas fa-user-secret fa-3x mb-3 text-primary"></i>
+                <h5>Anonymous Sign-Up</h5>
+                <p>Create a unique ID and password. No email or personal data required.</p>
+            </div>
+            <div class="col-md-3" data-aos="fade-up">
+                <i class="fas fa-wallet fa-3x mb-3 text-primary"></i>
+                <h5>Connect USDT Wallet</h5>
+                <p>Add your wallet address to receive payments directly.</p>
+            </div>
+            <div class="col-md-3" data-aos="fade-up">
+                <i class="fas fa-link fa-3x mb-3 text-primary"></i>
+                <h5>Provide Your File Link</h5>
+                <p>Upload your file anywhere (Google Drive, Mega, IPFS, etc.) and just paste the link. We never store or host your files.</p>
+            </div>
+            <div class="col-md-3" data-aos="fade-left">
+                <i class="fas fa-coins fa-3x mb-3 text-primary"></i>
+                <h5>Earn Instantly</h5>
+                <p>Share links and get paid in USDT with just a 2% fee.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-5 header-card text-white text-center">
+    <div class="container">
+        <h2 class="text-center mb-4">Why Choose Crypto File?</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <h3>Complete Anonymity</h3>
+                <p>No email or personal info needed, ever.</p>
+            </div>
+            <div class="col-md-4">
+                <h3>Low 2% Fee</h3>
+                <p>Keep more of your earnings with our minimal fee.</p>
+            </div>
+            <div class="col-md-4">
+                <h3>Instant Payments</h3>
+                <p>Funds go directly to your USDT wallet.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Signals -->
+<section class="py-5">
+    <div class="container text-center">
+        <h2 class="mb-4">Built for Your Privacy & Security</h2>
+        <p class="lead">We use industry-standard security and collect minimal data—no cookies, no tracking. Your files and transactions are safe with us.</p>
+        <p class="lead">We never store or access your files. You control the link, you control the content.</p>
+
+        <a asp-controller="Home" asp-action="Privacy" class="btn btn-outline-primary me-2">Privacy Policy</a>
+        <a asp-controller="Home" asp-action="Terms" class="btn btn-outline-primary">Terms of Service</a>
+    </div>
+</section>
+
+<!-- Legal Responsibility Notice -->
+<section class="py-4 bg-warning text-dark text-center mb-4" style="border-radius:15px" >
+    <div class="container">
+        <p class="mb-0">
+            <strong>Important:</strong> Sellers are fully responsible for the legality of their file content.
+            We only manage links and payments — no files are stored on our servers.
+        </p>
+    </div>
+</section>
+
+<!-- Final CTA -->
+<div class="text-center py-5 bg-light" style="border-radius:15px">
+    <h3 class="pb-3">Ready to Earn Crypto Anonymously?</h3>
+    <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg" style="border-radius:3rem">Join Free Today</a>
+</div>
+
+@section Scripts {
+    <!-- AOS for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <!-- Animate.css for CTA button -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <script>
+        AOS.init();
+    </script>
+}

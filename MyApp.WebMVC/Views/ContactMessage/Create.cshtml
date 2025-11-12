@@ -1,0 +1,111 @@
+﻿@model MyApp.WebMVC.Models.ContactMessageCreateViewModel
+
+@{
+    ViewData["Title"] = "Contact Support";
+    Layout = "~/Views/Shared/_DashLayout.cshtml";
+}
+
+<!-- Header Section -->
+
+    <h1 class="mb-3" data-aos="fade-up">Contact Support</h1>
+    <p class="text-muted">Have an issue or question? Submit your message below, and we'll respond to your email as soon as possible.</p>
+    <div class="mb-3">
+        <h5>Support Information</h5>
+        <p>
+            @* <a href="mailto:cryptofile.runasp.net@outlook.com" target="_blank" rel="noopener noreferrer" class="text-primary"><i class="fas fa-envelope me-1"></i>Email Support</a> | *@
+            @* <a href="https://t.me/cryptofile_support" target="_blank" rel="noopener noreferrer" class="text-primary"><i class="fab fa-telegram-plane me-1"></i>Telegram Support</a> *@
+        </p>
+    </div>
+    <hr />
+
+    <!-- Success/Error Message -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <ul>
+                @foreach (var entry in ViewData.ModelState)
+                {
+                    foreach (var error in entry.Value.Errors)
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                }
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Form Section -->
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Create" id="contactForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group mb-3" data-aos="fade-up" data-aos-delay="100">
+                    <label asp-for="Email" class="control-label fw-bold">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        <input asp-for="Email" class="form-control" placeholder="Enter your email" aria-describedby="emailHelp" />
+                    </div>
+                    <small id="emailHelp" class="form-text text-muted">We'll respond to this email address.</small>
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3" data-aos="fade-up" data-aos-delay="200">
+                    <label asp-for="Subject" class="control-label fw-bold">Subject</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-heading"></i></span>
+                        <input asp-for="Subject" class="form-control" placeholder="e.g., Payment Issue" aria-describedby="subjectHelp" />
+                    </div>
+                    <small id="subjectHelp" class="form-text text-muted">Briefly describe the issue.</small>
+                    <span asp-validation-for="Subject" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3" data-aos="fade-up" data-aos-delay="300">
+                    <label asp-for="Message" class="control-label fw-bold">Message</label>
+                    <textarea asp-for="Message" class="form-control" rows="5" placeholder="Describe your issue or question" aria-describedby="messageHelp"></textarea>
+                    <small id="messageHelp" class="form-text text-muted">Provide details to help us assist you better.</small>
+                    <span asp-validation-for="Message" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3" data-aos="fade-up" data-aos-delay="400">
+                    <button type="submit" class="btn btn-primary animate__animated animate__pulse animate__infinite"><i class="fas fa-paper-plane me-2"></i>Send Message</button>
+                    <a href="mailto:cryptofile.runasp.net@outlook.com" class="btn btn-outline-secondary ms-2">Email Support</a>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="card p-3" data-aos="fade-left">
+                <h5>Why Contact Us?</h5>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Fast response within 24 hours</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Secure and private communication</li>
+                    @* <li><i class="fas fa-check-circle text-success me-2"></i>Support via email or Telegram</li> *@
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        AOS.init();
+    </script>
+}

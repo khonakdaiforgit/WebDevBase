@@ -1,0 +1,222 @@
+﻿@using MyApp.Application.Helper
+@model MyApp.WebMVC.Models.UserAffiliateDataViewModel
+
+@{
+    ViewData["Title"] = "Your Affiliate";
+    Layout = "~/Views/Shared/_DashLayout.cshtml";
+
+    // --- Commission and Payout Settings ---
+    var siteCommissionRate = AppSettingsHelper.SiteCommissionRate;      // e.g. 0.02 (2%)
+    var userAffiliateRate = AppSettingsHelper.UserAffiliateRate;        // e.g. 0.5 (50%)
+    var minPayout = AppSettingsHelper.MinimumPayoutAmount;              // e.g. 25
+
+    // --- Calculations ---
+    var totalSiteProfit = Model.RelatedProductSealsAmount * siteCommissionRate;
+    var payableAmount = totalSiteProfit * userAffiliateRate;
+    var canWithdraw = payableAmount >= minPayout;
+}
+
+@functions {
+    public string GetTimeAgo(DateTimeOffset date)
+    {
+        var diff = DateTimeOffset.Now - date;
+
+        if (diff.TotalMinutes < 1) return "Just now";
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} minute{(diff.TotalMinutes >= 2 ? "s" : "")} ago";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours} hour{(diff.TotalHours >= 2 ? "s" : "")} ago";
+        if (diff.TotalDays < 30) return $"{(int)diff.TotalDays} day{(diff.TotalDays >= 2 ? "s" : "")} ago";
+        if (diff.TotalDays < 365) return $"{(int)(diff.TotalDays / 30)} month{(diff.TotalDays / 30 >= 2 ? "s" : "")} ago";
+
+        return $"{(int)(diff.TotalDays / 365)} year{(diff.TotalDays / 365 >= 2 ? "s" : "")} ago";
+    }
+}
+
+<h1 class="mb-3" data-aos="fade-up">Your Affiliate</h1>
+<p class="text-muted">Share your unique referral link to earn rewards whenever someone signs up and sells through your invitation.</p>
+<hr />
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="form-group mb-3">
+            <label class="control-label fw-bold">Your Affiliate Link</label>
+
+            @if (!string.IsNullOrEmpty(Model.UserReferralCode))
+            {
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-link"></i></span>
+
+                    @{
+                        var referralLink = $"{AppSettingsHelper.GetMvcAddress()}?refCode={Model.UserReferralCode}";
+                    }
+
+                    <input id="affiliateLink" type="text" class="form-control" value="@referralLink" readonly />
+                    <button type="button" class="btn btn-outline-primary" onclick="copyAffiliateLink()">Copy</button>
+                </div>
+                <small class="form-text text-muted">
+                    Share this link with others. You’ll earn rewards when they register and sell files.
+                </small>
+            }
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h5>Why Share Your Affiliate Link?</h5>
+            <p>Invite others and earn a percentage from platform fees when they sell files using your link.</p>
+            <ul class="list-unstyled">
+                <li><i class="fas fa-check-circle text-success me-2"></i> Earn passive income with zero effort</li>
+                <li><i class="fas fa-check-circle text-success me-2"></i> Instant rewards in USDT</li>
+                <li><i class="fas fa-check-circle text-success me-2"></i> Track your referrals securely</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="col-md-12">
+        <div class="row text-center">
+            <div class="col-md-3" data-aos="zoom-in" data-aos-delay="100">
+                <div class="card shadow-sm border-0 rounded-3 p-3">
+                    <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                    <h5 class="fw-bold mb-0">@Model.RegisteredUserCount</h5>
+                    <small class="text-muted">Registered Users via Your Link</small>
+                </div>
+            </div>
+
+            <div class="col-md-3" data-aos="zoom-in" data-aos-delay="200">
+                <div class="card shadow-sm border-0 rounded-3 p-3">
+                    <i class="fas fa-file-alt fa-2x text-success mb-2"></i>
+                    <h5 class="fw-bold mb-0">@Model.RelatedProductCount</h5>
+                    <small class="text-muted">Products Count by Your Referrals</small>
+                </div>
+            </div>
+
+            <div class="col-md-3" data-aos="zoom-in" data-aos-delay="300">
+                <div class="card shadow-sm border-0 rounded-3 p-3">
+                    <i class="fas fa-shopping-cart fa-2x text-info mb-2"></i>
+                    <h5 class="fw-bold mb-0">@Model.RelatedProductSealsCount</h5>
+                    <small class="text-muted">Total Sales Transactions</small>
+                </div>
+            </div>
+
+            <div class="col-md-3" data-aos="zoom-in" data-aos-delay="400">
+                <div class="card shadow-sm border-0 rounded-3 p-3">
+                    <i class="fas fa-dollar-sign fa-2x text-warning mb-2"></i>
+                    <h5 class="fw-bold mb-0">@Model.RelatedProductSealsAmount.ToString("N2") USDT</h5>
+                    <small class="text-muted">Total Sales via Your Network</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info message about calculation time -->
+        <p class="text-muted mt-3">
+            <i class="fas fa-info-circle text-primary me-2"></i>
+            Sales count and total amount are calculated since your last affiliate payment
+            (<strong>
+                @(Model.LastAffiliatePayment != default && Model.LastAffiliatePayment.Year > 1
+                                ? Model.LastAffiliatePayment.ToString("dd MMM yyyy")
+                                : "the beginning of your activity")
+            </strong>).
+        </p>
+    </div>
+
+    <div class="text-center mt-4">
+        <div class="d-inline-flex align-items-center bg-light rounded-pill px-4 py-2 shadow-sm">
+            <i class="fas fa-clock text-success me-2"></i>
+            <span class="fw-medium text-dark">
+                @if (Model.LastAffiliatePayment != default && Model.LastAffiliatePayment.Year > 1)
+                {
+                    <span>Last payment: @Model.LastAffiliatePayment.ToString("dd MMM yyyy - HH:mm")</span>
+                    <span class="text-success ms-2">• @(GetTimeAgo(Model.LastAffiliatePayment))</span>
+                }
+                else
+                {
+                    <span class="text-muted">No payment yet</span>
+                }
+            </span>
+        </div>
+    </div>
+
+    <!-- Commission Details Section -->
+    <div class="col-md-12 mt-4">
+        <div class="card shadow-sm border-0 rounded-3 p-4">
+            <h5 class="fw-bold mb-3"><i class="fas fa-wallet text-success me-2"></i>Commission & Payout Details</h5>
+
+            <p class="text-muted">
+                The platform keeps <strong>@((siteCommissionRate * 100).ToString("N0"))%</strong> of each sale as a service fee.
+                You earn <strong>@((userAffiliateRate * 100).ToString("N0"))%</strong> of this 2% as your affiliate commission.
+            </p>
+
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <strong>Site profit from your network:</strong>
+                    <span class="float-end">@totalSiteProfit.ToString("N2") USDT</span>
+                </li>
+                <li class="list-group-item">
+                    <strong>Your payable commission:</strong>
+                    <span class="float-end fw-bold text-success">@payableAmount.ToString("N2") USDT</span>
+                </li>
+            </ul>
+
+            <div class="mt-3 text-center">
+                @if (canWithdraw)
+                {
+                    <a class="btn btn-success px-4 py-2" asp-action="AffiliatePayment">
+                        <i class="fas fa-money-check-alt me-2"></i>Transfer To Your Wallet
+                    </a>
+                }
+                else
+                {
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Your payable amount must be at least <strong>@minPayout.ToString("N2") USDT</strong> to request payment.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="alert alert-info mt-4" role="alert">
+    <i class="fas fa-shield-alt me-2"></i>
+    Your referral data is private and encrypted. We never share your referral activity with anyone.
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+    <script>
+        AOS.init();
+
+        function copyAffiliateLink() {
+            const input = document.getElementById('affiliateLink');
+            input.select();
+            input.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            alert('Your affiliate link has been copied!');
+        }
+
+        document.getElementById('affiliateForm')?.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const form = e.target;
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            });
+            if (response.ok) location.reload();
+            else alert('Something went wrong while generating your link. Please try again.');
+        });
+    </script>
+}

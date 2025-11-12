@@ -1,0 +1,103 @@
+﻿@model MyApp.WebMVC.Models.FileLinkViewModel
+
+@{
+    ViewData["Title"] = "Edit Product";
+    Layout = "~/Views/Shared/_DashLayout.cshtml";
+}
+
+<!-- Header Section -->
+    <h1 class="mb-3" data-aos="fade-up">Edit Product</h1>
+    <p class="text-muted">Update your file details. Ensure the file link is secure and the price reflects the value of your product.</p>
+    <hr />
+
+    <!-- Success/Error Message -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <ul>
+                @foreach (var entry in ViewData.ModelState)
+                {
+                    foreach (var error in entry.Value.Errors)
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                }
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Form Section -->
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="EditProduct" id="editProductForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <div class="form-group mb-3">
+                    <label asp-for="Url" class="control-label fw-bold">File URL</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-link"></i></span>
+                        <input asp-for="Url" class="form-control" placeholder="Enter HTTPS link (e.g., https://wetransfer.com/...)" aria-describedby="urlHelp" />
+                    </div>
+                    <small id="urlHelp" class="form-text text-muted">Use a secure HTTPS link from a trusted service. We do not store file contents.</small>
+                    <span asp-validation-for="Url" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="FileDescription" class="control-label fw-bold">Description</label>
+                    <input asp-for="FileDescription" class="form-control" placeholder="Briefly describe your file (e.g., eBook, Software)" aria-describedby="descHelp" />
+                    <small id="descHelp" class="form-text text-muted">Help buyers understand what they're purchasing.</small>
+                    <span asp-validation-for="FileDescription" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="Price" class="control-label fw-bold">Price (USD)</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                        <input asp-for="Price" class="form-control" type="number" step="0.01" placeholder="Enter price (e.g., 10.50)" aria-describedby="priceHelp" />
+                    </div>
+                    <small id="priceHelp" class="form-text text-muted">Set a price for your file. You'll receive 98% after our 2% fee.</small>
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <button type="submit" class="btn btn-primary animate__animated animate__pulse animate__infinite"><i class="fas fa-save me-2"></i>Update Product</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary ms-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+@section Scripts {
+    <!-- AOS for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <!-- Animate.css for button animation -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <script>
+        AOS.init();
+
+        // Basic client-side validation
+        document.getElementById('editProductForm').addEventListener('submit', function (e) {
+            const url = document.querySelector('#Url').value;
+            const price = document.querySelector('#Price').value;
+            if (!url.startsWith('https://')) {
+                alert('Please enter a secure HTTPS URL from a trusted service.');
+                e.preventDefault();
+            }
+            if (price <= 0) {
+                alert('Please enter a valid price greater than 0.');
+                e.preventDefault();
+            }
+        });
+    </script>
+    <!-- ASP.NET Validation Scripts -->
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}

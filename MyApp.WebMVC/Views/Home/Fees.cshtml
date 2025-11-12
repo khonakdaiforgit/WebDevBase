@@ -1,0 +1,112 @@
+﻿
+@{
+    ViewData["Title"] = "Fees";
+}
+
+<!-- Main Content -->
+<div class="container py-5">
+    <div class="header-card mb-5">
+        <h1 class="text-center mb-4"><i class="fas fa-coins"></i> Fees</h1>
+        <p class="lead text-center">Welcome to Crypto File! As a seller, this page provides a transparent breakdown of fees when selling your files with USDT (TRC20) via our platform using NOWPayments. Understand what you’ll receive after fees.</p>
+    </div>
+
+    <div class="section-card">
+        <h2><i class="fas fa-info-circle"></i> How Fees Work</h2>
+        <p>When you list a file for sale on Crypto File, the buyer pays a total amount in USDT (TRC20) that includes various fees. After processing, Crypto File deducts a 2% platform fee, and the remaining amount is transferred to your TRC20 wallet. A network fee may apply if you withdraw or transfer funds. Here’s the breakdown:</p>
+        <ul class="list-custom">
+            <li><i class="fas fa-money-bill-wave"></i> <strong>Amount Paid by Buyer:</strong> The total USDT amount, including your set price plus fees.</li>
+            <li><i class="fas fa-network-wired"></i> <strong>Network Fee:</strong> Paid by the buyer to initiate the transaction on the TRC20 network.</li>
+            <li><i class="fas fa-hand-holding-usd"></i> <strong>NOWPayments Fee:</strong> 0.5% service fee added to the buyer’s payment.</li>
+            <li><i class="fas fa-percentage"></i> <strong>Crypto File Fee:</strong> 2% platform fee retained by Crypto File.</li>
+            <li><i class="fas fa-exchange-alt"></i> <strong>Transfer Fee to Your Wallet:</strong> A potential network fee (~0.243 USDT) if you withdraw or transfer funds from your wallet.</li>
+        </ul>
+    </div>
+
+    <div class="section-card">
+        <h2><i class="fas fa-list"></i> Fee Breakdown</h2>
+        <p>Here’s a detailed overview of fees and your earnings as a seller:</p>
+        <ul class="list-custom">
+            <li><i class="fas fa-money-bill-wave"></i> <strong>Amount Paid by Buyer:</strong> Includes your set price plus added fees (e.g., ~10.293 USDT for a $10 sale).</li>
+            <li><i class="fas fa-network-wired"></i> <strong>Network Fee:</strong> Approx. 0.72 TRX (~0.243 USDT with TRX at ~$0.338, Sep 2025), paid by the buyer.</li>
+            <li><i class="fas fa-hand-holding-usd"></i> <strong>NOWPayments Fee:</strong> 0.5% of the buyer’s payment (e.g., ~0.05 USDT for a $10 sale), paid by the buyer.</li>
+            <li><i class="fas fa-percentage"></i> <strong>Crypto File Platform Fee:</strong> 2% of the total payment (e.g., ~0.20586 USDT), retained by Crypto File.</li>
+            <li><i class="fas fa-exchange-alt"></i> <strong>Transfer Fee to Your Wallet:</strong> Approx. 0.243 USDT, paid by you if you withdraw or transfer funds (may be covered by NOWPayments).</li>
+            <li><i class="fas fa-wallet"></i> <strong>Your Earnings:</strong> The remaining amount after the 2% platform fee, minus any withdrawal fee if applicable.</li>
+        </ul>
+    </div>
+
+    <div class="section-card">
+        <h2><i class="fas fa-calculator"></i> Example Calculation for a $10 Sale</h2>
+        <p>If you set your file price at $10, and the buyer pays 10.293 USDT (including fees):</p>
+        <table class="table table-striped table-custom">
+            <thead>
+                <tr>
+                    <th>Step</th>
+                    <th>Amount (USDT)</th>
+                    <th>Fee (USDT)</th>
+                    <th>Net Amount (USDT)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Amount Paid by Buyer</td>
+                    <td>10.293</td>
+                    <td>-</td>
+                    <td>10.293 (to NOWPayments)</td>
+                </tr>
+                <tr>
+                    <td>Network Fee</td>
+                    <td>-</td>
+                    <td>0.243 (by buyer)</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>NOWPayments Fee (0.5%)</td>
+                    <td>-</td>
+                    <td>0.05 (by buyer)</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Crypto File Fee (2%)</td>
+                    <td>-</td>
+                    <td>0.20586 (by Crypto File)</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Transfer Fee to Your Wallet</td>
+                    <td>-</td>
+                    <td>0.243 (by you, if applicable)</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Deposited to Your Wallet (No Withdrawal Fee)</td>
+                    <td>10.08714</td>
+                    <td>-</td>
+                    <td>10.08714 (to you)</td>
+                </tr>
+                <tr>
+                    <td>After Withdrawal Fee (if applied)</td>
+                    <td>10.08714</td>
+                    <td>0.243 (by you)</td>
+                    <td>9.84414 (to you)</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="text-muted">*Note: Amounts are approximate and may vary due to TRX price changes or NOWPayments settings. The withdrawal fee applies only if you transfer funds from your wallet.</p>
+    </div>
+
+    <div class="section-card">
+        <h2><i class="fas fa-lightbulb"></i> Important Tips for Sellers</h2>
+        <ul class="list-custom">
+            <li><i class="fas fa-network-wired"></i> Ensure buyers use the TRC20 network for USDT payments; other networks are not supported.</li>
+            <li><i class="fas fa-coins"></i> Keep 1-2 TRX in your wallet to cover potential withdrawal fees (~0.243 USDT per transfer).</li>
+            <li><i class="fas fa-eye"></i> Monitor transactions on <a href="https://tronscan.io" target="_blank">Tronscan.io</a> with your wallet address.</li>
+            <li><i class="fas fa-sync"></i> Fees may change. Review the latest rates in your dashboard before listing a file.</li>
+            <li><i class="fas fa-headset"></i> Contact support at [cryptofile.runasp.net@outlook.com] if you encounter issues.</li>
+        </ul>
+    </div>
+
+    <div class="text-center footer-text">
+        <p class="text-muted">Last updated: September 28, 2025, 01:35 PM JST</p>
+    </div>
+</div>

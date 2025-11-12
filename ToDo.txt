@@ -1,0 +1,23 @@
+7/6/2025
+	1- * create onion architect sample
+--------------
+7/7/2025
+	1- * change layout and loing detecstion
+--------------
+7/8/2025
+	1- * Finsh Core 
+--------------
+7/9/2025
+	1- * create api and mvc UI 
+--------------
+9/19/2025
+	1- * login expier
+--------------
+9/23/2025
+	1- * SEO
+	2- * Log View and site visit
+	3- * trnsactiion details
+--------------
+9/29/2025
+	1- * Add host ip to NOPAYMNET
+	2- Contact Suport

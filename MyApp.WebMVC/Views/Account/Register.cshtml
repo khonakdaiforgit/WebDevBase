@@ -1,0 +1,137 @@
+﻿@model MyApp.WebMVC.Models.RegisterUserViewModel
+
+@{
+    ViewData["Title"] = "Register with Crypto File";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="text-center" data-aos="fade-up">
+                <img src="~/img/CryptoFile_With.png" alt="Crypto File Logo for Secure File Trading" class="img-fluid mb-3" style="max-width: 300px; padding:0 30px">
+                <h1 class="display-4 mb-4">Secure File Trading</h1>
+                <h2>Create Your Account</h2>
+                <p class="text-muted mb-4">Join Crypto File to sell files anonymously with USDT. Save your User ID securely.</p>
+                <hr />
+            </div>
+
+            <!-- Success/Error Message -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <!-- Register Form -->
+            <form asp-action="Register" method="post" id="registerForm">
+                <div asp-validation-summary="All" class="text-danger" aria-live="assertive"></div>
+                <div class="mb-3">
+                    <label asp-for="Id" class="form-label fw-bold">User ID</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input asp-for="Id" class="form-control" readonly aria-describedby="idHelp" />
+                        <button type="button" class="btn btn-outline-secondary copy-btn" data-clipboard-text="@Model.Id" title="Copy User ID"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <small id="idHelp" class="form-text text-muted">This is your unique ID. Save it securely, as it cannot be recovered.</small>
+                    <span asp-validation-for="Id" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label fw-bold">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input asp-for="Password" class="form-control" type="password" id="passwordInput" placeholder="Enter a strong password" aria-describedby="passwordHelp" />
+                        <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('passwordInput', 'toggleIconPassword')"><i class="fas fa-eye" id="toggleIconPassword"></i></button>
+                    </div>
+                    <small id="passwordHelp" class="form-text text-muted">Use at least 8 characters, including letters, numbers, and symbols.</small>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ConfirmPassword" class="form-label fw-bold">Confirm Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input asp-for="ConfirmPassword" class="form-control" type="password" id="confirmPasswordInput" placeholder="Re-enter your password" aria-describedby="confirmPasswordHelp" />
+                        <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('confirmPasswordInput', 'toggleIconConfirm')"><i class="fas fa-eye" id="toggleIconConfirm"></i></button>
+                    </div>
+                    <small id="confirmPasswordHelp" class="form-text text-muted">Must match the password above.</small>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <button type="submit" class="btn btn-primary animate__animated animate__pulse animate__infinite"><i class="fas fa-user-plus me-2"></i>Register</button>
+                    <div>
+                        <a asp-action="Login" class="btn btn-link">Login</a>
+                        <a href="mailto:cryptofile.runasp.net@outlook.com" class="btn btn-link">Need Help?</a>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Security Note -->
+            <div class="alert alert-info text-center" role="alert">
+                <i class="fas fa-shield-alt me-2"></i>Your credentials are encrypted and secure. <a asp-controller="Home" asp-action="Privacy">Learn more</a>.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- AOS for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <!-- Animate.css for button animation -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <!-- Clipboard.js for copy-to-clipboard -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.10/clipboard.min.js"></script>
+    <script>
+        AOS.init();
+
+        // Initialize Clipboard.js
+        var clipboard = new ClipboardJS('.copy-btn');
+        clipboard.on('success', function (e) {
+            alert('User ID copied to clipboard! Save it securely.');
+            e.clearSelection();
+        });
+        clipboard.on('error', function (e) {
+            alert('Failed to copy User ID.');
+        });
+
+        // Toggle password visibility
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Basic client-side validation
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+            const password = document.querySelector('#passwordInput').value;
+            const confirmPassword = document.querySelector('#confirmPasswordInput').value;
+            if (password !== confirmPassword) {
+                alert('Passwords do not match.');
+                e.preventDefault();
+            }
+            if (password.length < 8) {
+                alert('Password must be at least 8 characters long.');
+                e.preventDefault();
+            }
+        });
+    </script>
+    <partial name="_ValidationScriptsPartial" />
+}

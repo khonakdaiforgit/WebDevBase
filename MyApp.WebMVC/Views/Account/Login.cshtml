@@ -1,0 +1,110 @@
+﻿@model MyApp.WebMVC.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login to Crypto File";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="text-center" data-aos="fade-up">
+                <img src="~/img/CryptoFile_With.png" alt="Crypto File Logo for Secure File Trading" class="img-fluid mb-3" style="max-width: 300px; padding:0 30px">
+                <h1 class="display-4 mb-4">Secure File Trading</h1>
+                <h2>Login to Your Account</h2>
+                <p class="text-muted mb-4">Access your dashboard to sell files anonymously with USDT.</p>
+                <hr />
+            </div>
+
+            <!-- Success/Error Message -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <!-- Login Form -->
+            <form asp-action="Login" method="post" id="loginForm">
+                <div asp-validation-summary="All" class="text-danger" aria-live="assertive"></div>
+                <div class="mb-3">
+                    <label asp-for="Id" class="form-label fw-bold">User ID</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input asp-for="Id" class="form-control" placeholder="Enter your unique User ID" aria-describedby="idHelp" />
+                    </div>
+                    <small id="idHelp" class="form-text text-muted">Your unique ID created during registration.</small>
+                    <span asp-validation-for="Id" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label fw-bold">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input asp-for="Password" class="form-control" type="password" id="passwordInput" placeholder="Enter your password" aria-describedby="passwordHelp" />
+                        <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()"><i class="fas fa-eye" id="toggleIcon"></i></button>
+                    </div>
+                    <small id="passwordHelp" class="form-text text-muted">Use a strong, unique password for security.</small>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <button type="submit" class="btn btn-primary animate__animated animate__pulse animate__infinite"><i class="fas fa-sign-in-alt me-2"></i>Login</button>
+                    <div>
+                        <a asp-action="Register" class="btn btn-link">Register</a>
+                        <a href="mailto:cryptofile.runasp.net@outlook.com" class="btn btn-link">Forgot Password?</a>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Security Note -->
+            <div class="alert alert-info text-center" role="alert">
+                <i class="fas fa-shield-alt me-2"></i>Your credentials are encrypted and secure. <a asp-controller="Home" asp-action="Privacy">Learn more</a>.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- AOS for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <!-- Animate.css for button animation -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <script>
+        AOS.init();
+
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('passwordInput');
+            const toggleIcon = document.getElementById('toggleIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Basic client-side validation
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            const userId = document.querySelector('#Id').value;
+            const password = document.querySelector('#Password').value;
+            if (!userId || !password) {
+                alert('Please fill in both User ID and Password.');
+                e.preventDefault();
+            }
+        });
+    </script>
+    <partial name="_ValidationScriptsPartial" />
+}
