@@ -10,6 +10,7 @@ namespace MyApp.Domain.Entities
         public string Message { get; set; }
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
         public bool IsRead { get; set; } = false;
+        public Guid RestaurantId { get; set; }
 
         public void MarkAsRead() => IsRead = true;
     }

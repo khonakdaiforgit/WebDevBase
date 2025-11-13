@@ -1,9 +1,4 @@
 ﻿using MyApp.Domain.Interfaces.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MyApp.Domain.Entities
 {
@@ -15,6 +10,7 @@ namespace MyApp.Domain.Entities
         public decimal Price { get;  set; }
         public string ImageUrl { get;  set; }
         public bool IsAvailable { get;  set; } = true;
+        public Guid CategoryId { get; set; }
 
         public void ToggleAvailability() => IsAvailable = !IsAvailable;
     }

@@ -1,33 +1,21 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using MyApp.Domain.Entities;
-using MyApp.Domain.Interfaces;
+using MyApp.Infrastructure.Data;
 using MyApp.Infrastructure.Repositories.Common;
+using MyApp.Infrastructure.Repositories.Interface;
 
 namespace MyApp.Infrastructure.Repositories;
 
-public class UserRepository : MongoRepository<User>, IUserRepository
+public class UserRepository : GenericRepository<User>, IUserRepository
 {
-    public UserRepository(IMongoClient client, MongoDbSettings settings) : base(client, settings)
-    {
-    }
+    public UserRepository(MongoDbContext context) : base(context) { }
 
-    public async Task<User> GetByEmailAsync(string email)
-    {
-        var filter = Builders<User>.Filter.Eq(x => x.Email, email);
-        return await _collection.Find(filter).FirstOrDefaultAsync();
-    }
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken ct = default)
+        => await _collection.Find(x => x.Email == email).FirstOrDefaultAsync(ct);
 
-    public async Task<User> GetByRefreshTokenAsync(string refreshToken)
-    {
-        var filter = Builders<User>.Filter.Eq(x => x.RefreshToken, refreshToken);
-        return await _collection.Find(filter).FirstOrDefaultAsync();
-    }
+    public async Task<User?> GetByRefreshTokenAsync(string refreshToken, CancellationToken ct = default)
+        => await _collection.Find(x => x.RefreshToken == refreshToken).FirstOrDefaultAsync(ct);
 
-    public async Task<bool> InsertedAdmin()
-    {
-        var filter = Builders<User>.Filter.Eq(x => x.Role, UserRole.Admin);
-        return await _collection.Find(filter).CountDocumentsAsync() > 0;
-
-    }
+    public async Task<IReadOnlyList<User>> GetByRoleAsync(UserRole role, CancellationToken ct = default)
+        => await _collection.Find(x => x.Role == role).ToListAsync(ct);
 }

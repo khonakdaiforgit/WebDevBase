@@ -13,7 +13,10 @@ namespace MyApp.Domain.Entities
         public string LogoUrl { get;  set; }
         public WorkingHours WorkingHours { get;  set; }
 
+        public Guid OwnerUserId { get; set; } // مالک رستوران
+
         // رفتار دامنه (Domain Behavior)
+        public void SetOwner(Guid ownerUserId) => OwnerUserId = ownerUserId;
         public void UpdateLogo(string url) => LogoUrl = url;
         public void UpdateHours(WorkingHours hours) => WorkingHours = hours;
     }

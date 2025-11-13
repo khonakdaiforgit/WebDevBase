@@ -17,15 +17,15 @@ namespace MyApp.Domain.Entities
 
         public string UserId { get; set; } = "Anonymous"; // User ID یا Anonymous
 
-        public string HashedIp { get; set; } = string.Empty; // IP هش‌شده
+        public string? HashedIp { get; set; } = string.Empty; // IP هش‌شده
 
-        public string UserAgent { get; set; } = string.Empty;
+        public string? UserAgent { get; set; } = string.Empty;
 
-        public string Method { get; set; } = string.Empty; // GET, POST, etc.
+        public string? Method { get; set; } = string.Empty; // GET, POST, etc.
 
-        public string Path { get; set; } = string.Empty;
+        public string? Path { get; set; } = string.Empty;
 
-        public int StatusCode { get; set; } = 0;
+        public int? StatusCode { get; set; }
 
         public string? Source { get; set; } // Start, End, Error
 

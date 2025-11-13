@@ -10,6 +10,7 @@ namespace MyApp.Domain.Entities
         public DateTime? SentAt { get;  set; }
         public Guid SentByUserId { get;  set; }
         public NewsletterStatus Status { get;  set; } = NewsletterStatus.Draft;
+        public Guid RestaurantId { get; set; }
 
         public void Send(Guid userId)
         {

@@ -9,6 +9,7 @@ namespace MyApp.Domain.Entities
         public string Caption { get;  set; }
         public DateTime UploadDate { get;  set; } = DateTime.UtcNow;
         public bool IsVisible { get;  set; } = true;
+        public Guid RestaurantId { get; set; }
 
         public void Hide() => IsVisible = false;
         public void Show() => IsVisible = true;

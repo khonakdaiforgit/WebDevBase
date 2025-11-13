@@ -10,6 +10,7 @@ namespace MyApp.Domain.Entities
         public string ImageUrl { get;  set; }
         public DateTime PublishDate { get;  set; } = DateTime.UtcNow;
         public bool IsPublished { get;  set; }
+        public Guid RestaurantId { get; set; }
 
         public void Publish() => IsPublished = true;
         public void Unpublish() => IsPublished = false;

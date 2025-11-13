@@ -1,51 +1,40 @@
-﻿using FluentValidation;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyApp.Application.DTOs.User;
-using MyApp.Application.UseCases.User;
+using MyApp.Application.Abstractions.Users;
+using MyApp.Application.Abstractions.Users.Dtos;
+using System.IdentityModel.Tokens.Jwt;
 
-namespace MyApp.WebAPI.Controllers
+[Route("api/auth")]
+[ApiController]
+public class AuthController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AuthController : ControllerBase
+    private readonly IAuthService _authService;
+
+    public AuthController(IAuthService authService) => _authService = authService;
+
+    [HttpPost("login")]
+    public async Task<ActionResult<AuthResult>> Login(LoginDto dto)
+        => Ok(await _authService.LoginAsync(dto));
+
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AuthResult>> Refresh(RefreshTokenDto dto)
+        => Ok(await _authService.RefreshAsync(dto));
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
     {
-        private readonly LoginUserUseCase _loginUseCase;
-        private readonly RefreshTokenUseCase _refreshUseCase;
-        private readonly IValidator<UserLoginDto> _validator;
+        var userId = Guid.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)!.Value);
+        await _authService.ChangePasswordAsync(userId, dto);
+        return Ok();
+    }
 
-        public AuthController(
-            LoginUserUseCase loginUseCase,
-            RefreshTokenUseCase refreshUseCase,
-            IValidator<UserLoginDto> validator)
-        {
-            _loginUseCase = loginUseCase;
-            _refreshUseCase = refreshUseCase;
-            _validator = validator;
-        }
-
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserLoginDto request)
-        {
-            var validationResult = await _validator.ValidateAsync(request);
-            if (!validationResult.IsValid)
-                return BadRequest(validationResult.Errors);
-
-            try
-            {
-                var result = await _loginUseCase.ExecuteAsync(request);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
-        }
-
-        [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
-        {
-            var result = await _refreshUseCase.ExecuteAsync(request.RefreshToken);
-            return Ok(result);
-        }
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        var userId = Guid.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)!.Value);
+        await _authService.LogoutAsync(userId);
+        return Ok();
     }
 }

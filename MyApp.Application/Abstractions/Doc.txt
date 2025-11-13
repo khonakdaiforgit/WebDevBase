@@ -1,0 +1,420 @@
+﻿// لایه Application
+// مسیر: src/Application
+// این لایه شامل اینترفیس‌های سرویس‌ها، DTOها و دستورات ساده (بدون CQRS) است.
+// فقط انتزاعات — پیاده‌سازی در لایه Infrastructure یا Presentation خواهد بود.
+
+using MyApp.Domain.Entities;
+using MyApp.Domain.ValueObjects;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace MyApp.Application.Common
+{
+    /// <summary>
+    /// DTOهای پایه برای پاسخ‌های لیست
+    /// </summary>
+    public record PagedResult<T>(IReadOnlyList<T> Items, int TotalCount, int Page, int PageSize);
+
+    /// <summary>
+    /// پاسخ خطا
+    /// </summary>
+    public record ErrorResult(string Code, string Message);
+}
+
+// ---------------------------------------------------------------------
+// 1. اینترفیس‌های سرویس‌های دامنه (فقط برای Restaurant و وابستگان)
+// ---------------------------------------------------------------------
+
+namespace MyApp.Application.Restaurants
+{
+    // ----- DTOهای ورودی -----
+    public record CreateRestaurantDto(
+        string Name,
+        string Address,
+        string Phone,
+        string Email,
+        string LogoUrl,
+        WorkingHours WorkingHours);
+
+    public record UpdateRestaurantDto(
+        Guid Id,
+        string Name,
+        string Address,
+        string Phone,
+        string Email,
+        string? LogoUrl,
+        WorkingHours? WorkingHours);
+
+    public record UpdateLogoDto(Guid RestaurantId, string LogoUrl);
+    public record UpdateWorkingHoursDto(Guid RestaurantId, WorkingHours WorkingHours);
+
+    // ----- DTOهای خروجی -----
+    public record RestaurantDto(
+        Guid Id,
+        string Name,
+        string Address,
+        string Phone,
+        string Email,
+        string LogoUrl,
+        WorkingHours WorkingHours);
+
+    public record RestaurantListItemDto(
+        Guid Id,
+        string Name,
+        string Address,
+        string LogoUrl);
+
+    /// <summary>
+    /// سرویس مدیریت رستوران‌ها
+    /// </summary>
+    public interface IRestaurantService
+    {
+        Task<Guid> CreateAsync(CreateRestaurantDto dto, Guid ownerUserId);
+        Task UpdateAsync(UpdateRestaurantDto dto, Guid callerUserId);
+        Task DeleteAsync(Guid restaurantId, Guid callerUserId);
+        Task<RestaurantDto?> GetAsync(Guid restaurantId);
+        Task<PagedResult<RestaurantListItemDto>> GetListAsync(int page = 1, int pageSize = 20, Guid? ownerUserId = null);
+
+        Task UpdateLogoAsync(UpdateLogoDto dto, Guid callerUserId);
+        Task UpdateWorkingHoursAsync(UpdateWorkingHoursDto dto, Guid callerUserId);
+    }
+}
+
+// ---------------------------------------------------------------------
+// 2. سرویس منو (دسته‌بندی + آیتم‌ها)
+// ---------------------------------------------------------------------
+
+namespace MyApp.Application.Menus
+{
+    // ----- DTOهای ورودی -----
+    public record CreateCategoryDto(string Name, int Order, Guid RestaurantId);
+    public record UpdateCategoryDto(Guid Id, string Name, int Order);
+
+    public record CreateMenuItemDto(
+        string Name,
+        string Description,
+        decimal Price,
+        string ImageUrl,
+        bool IsAvailable,
+        Guid CategoryId);
+
+    public record UpdateMenuItemDto(
+        Guid Id,
+        string? Name,
+        string? Description,
+        decimal? Price,
+        string? ImageUrl,
+        bool? IsAvailable);
+
+    // ----- DTOهای خروجی -----
+    public record MenuCategoryDto(
+        Guid Id,
+        string Name,
+        int Order,
+        IReadOnlyList<MenuItemDto> Items);
+
+    public record MenuItemDto(
+        Guid Id,
+        string Name,
+        string Description,
+        decimal Price,
+        string ImageUrl,
+        bool IsAvailable);
+
+    public interface IMenuService
+    {
+        // دسته‌بندی
+        Task<Guid> CreateCategoryAsync(CreateCategoryDto dto, Guid callerUserId);
+        Task UpdateCategoryAsync(UpdateCategoryDto dto, Guid callerUserId);
+        Task DeleteCategoryAsync(Guid categoryId, Guid callerUserId);
+        Task<MenuCategoryDto?> GetCategoryAsync(Guid categoryId);
+
+        // آیتم
+        Task<Guid> CreateItemAsync(CreateMenuItemDto dto, Guid callerUserId);
+        Task UpdateItemAsync(UpdateMenuItemDto dto, Guid callerUserId);
+        Task DeleteItemAsync(Guid itemId, Guid callerUserId);
+        Task ToggleAvailabilityAsync(Guid itemId, Guid callerUserId);
+    }
+}
+
+// ---------------------------------------------------------------------
+// 3. سرویس گالری
+// ---------------------------------------------------------------------
+
+namespace MyApp.Application.Galleries
+{
+    public record UploadGalleryItemDto(string ImageUrl, string Caption, Guid RestaurantId);
+    public record UpdateGalleryItemDto(Guid Id, string? Caption, bool? IsVisible);
+
+    public record GalleryItemDto(
+        Guid Id,
+        string ImageUrl,
+        string Caption,
+        DateTime UploadDate,
+        bool IsVisible);
+
+    public interface IGalleryService
+    {
+        Task<Guid> UploadAsync(UploadGalleryItemDto dto, Guid callerUserId);
+        Task UpdateAsync(UpdateGalleryItemDto dto, Guid callerUserId);
+        Task DeleteAsync(Guid itemId, Guid callerUserId);
+        Task HideAsync(Guid itemId, Guid callerUserId);
+        Task ShowAsync(Guid itemId, Guid callerUserId);
+        Task<PagedResult<GalleryItemDto>> GetForRestaurantAsync(Guid restaurantId, int page = 1, int pageSize = 20);
+    }
+}
+
+// ---------------------------------------------------------------------
+// 4. سرویس خبر
+// ---------------------------------------------------------------------
+
+namespace MyApp.Application.News
+{
+    public record CreateNewsDto(string Title, string Content, string ImageUrl, Guid RestaurantId);
+    public record UpdateNewsDto(Guid Id, string? Title, string? Content, string? ImageUrl, bool? IsPublished);
+
+    public record NewsDto(
+        Guid Id,
+        string Title,
+        string Content,
+        string ImageUrl,
+        DateTime PublishDate,
+        bool IsPublished);
+
+    public record NewsListItemDto(
+        Guid Id,
+        string Title,
+        string ImageUrl,
+        DateTime PublishDate,
+        bool IsPublished);
+
+    public interface INewsService
+    {
+        Task<Guid> CreateAsync(CreateNewsDto dto, Guid callerUserId);
+        Task UpdateAsync(UpdateNewsDto dto, Guid callerUserId);
+        Task DeleteAsync(Guid newsId, Guid callerUserId);
+        Task PublishAsync(Guid newsId, Guid callerUserId);
+        Task UnpublishAsync(Guid newsId, Guid callerUserId);
+        Task<NewsDto?> GetAsync(Guid newsId);
+        Task<PagedResult<NewsListItemDto>> GetListAsync(Guid? restaurantId = null, int page = 1, int pageSize = 20);
+    }
+}
+
+// ---------------------------------------------------------------------
+// 5. سرویس خبرنامه (Newsletter)
+// ---------------------------------------------------------------------
+
+namespace MyApp.Application.Newsletters
+{
+    public record CreateNewsletterDto(string Subject, string Content, Guid RestaurantId);
+    public record UpdateNewsletterDto(Guid Id, string? Subject, string? Content);
+
+    public record NewsletterDto(
+        Guid Id,
+        string Subject,
+        string Content,
+        DateTime? SentAt,
+        Guid SentByUserId,
+        NewsletterStatus Status);
+
+    public record NewsletterListItemDto(
+        Guid Id,
+        string Subject,
+        DateTime? SentAt,
+        NewsletterStatus Status);
+
+    public interface INewsletterService
+    {
+        Task<Guid> CreateAsync(CreateNewsletterDto dto, Guid callerUserId);
+        Task UpdateAsync(UpdateNewsletterDto dto, Guid callerUserId);
+        Task DeleteAsync(Guid newsletterId, Guid callerUserId);
+        Task SendAsync(Guid newsletterId, Guid callerUserId);
+        Task ScheduleAsync(Guid newsletterId, Guid callerUserId);
+        Task<NewsletterDto?> GetAsync(Guid newsletterId);
+        Task<PagedResult<NewsletterListItemDto>> GetListAsync(Guid? restaurantId = null, int page = 1, int pageSize = 20);
+    }
+}
+
+// ---------------------------------------------------------------------
+// 6. سرویس مشترکین ایمیل
+// ---------------------------------------------------------------------
+
+namespace MyApp.Application.Subscribers
+{
+    public record SubscribeDto(string Email, Guid RestaurantId);
+    public record ConfirmSubscriptionDto(string Token);
+    public record UnsubscribeDto(string Token);
+
+    public record SubscriberDto(
+        Guid Id,
+        string Email,
+        DateTime SubscribedAt,
+        bool IsActive);
+
+    public interface IEmailSubscriberService
+    {
+        Task SubscribeAsync(SubscribeDto dto);
+        Task ConfirmAsync(ConfirmSubscriptionDto dto);
+        Task UnsubscribeAsync(UnsubscribeDto dto);
+        Task<PagedResult<SubscriberDto>> GetActiveListAsync(Guid restaurantId, int page = 1, int pageSize = 50);
+    }
+}
+
+// ---------------------------------------------------------------------
+// 7. سرویس پیام‌های تماس
+// ---------------------------------------------------------------------
+
+namespace MyApp.Application.Contacts
+{
+    public record ContactMessageDto(
+        Guid Id,
+        string Name,
+        string Email,
+        string Message,
+        DateTime SentAt,
+        bool IsRead);
+
+    public interface IContactMessageService
+    {
+        Task<Guid> SubmitAsync(string name, string email, string message, Guid? restaurantId = null);
+        Task MarkAsReadAsync(Guid messageId, Guid callerUserId);
+        Task<PagedResult<ContactMessageDto>> GetListAsync(Guid? restaurantId = null, bool? onlyUnread = null, int page = 1, int pageSize = 20);
+    }
+}
+
+// ---------------------------------------------------------------------
+// 8. سرویس کاربر و احراز هویت (فقط انتزاع)
+// ---------------------------------------------------------------------
+
+namespace MyApp.Application.Users
+{
+    public record LoginDto(string Email, string Password);
+    public record ChangePasswordDto(string CurrentPassword, string NewPassword);
+    public record RefreshTokenDto(string RefreshToken);
+
+    public record AuthResult(
+        string AccessToken,
+        string RefreshToken,
+        DateTime ExpiresAt,
+        UserDto User);
+
+    public record UserDto(
+        Guid Id,
+        string Email,
+        UserRole Role,
+        bool IsActive,
+        DateTime CreatedAt);
+
+    public interface IAuthService
+    {
+        Task<AuthResult> LoginAsync(LoginDto dto);
+        Task<AuthResult> RefreshAsync(RefreshTokenDto dto);
+        Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto);
+        Task LogoutAsync(Guid userId);
+    }
+
+    public interface IUserService
+    {
+        Task<UserDto?> GetCurrentUserAsync(Guid userId);
+        Task DeactivateAsync(Guid targetUserId, Guid callerUserId);
+        Task ActivateAsync(Guid targetUserId, Guid callerUserId);
+        Task<PagedResult<UserDto>> GetListAsync(int page = 1, int pageSize = 20);
+    }
+}
+
+// ---------------------------------------------------------------------
+// 9. سرویس لاگ (فقط برای مالک پروژه)
+// ---------------------------------------------------------------------
+
+namespace MyApp.Application.Logging
+{
+    public record LogEntryDto(
+        Guid Id,
+        DateTime Timestamp,
+        string Level,
+        string Message,
+        string? ExceptionMessage,
+        string? StackTrace,
+        string UserId,
+        string HashedIp,
+        string UserAgent,
+        string Method,
+        string Path,
+        int StatusCode,
+        string? Source,
+        string Project);
+
+    public interface ILogService
+    {
+        Task LogAsync(LogEntry entry); // استفاده داخلی
+        Task<PagedResult<LogEntryDto>> GetLogsAsync(
+            DateTime? from = null,
+            DateTime? to = null,
+            string? level = null,
+            string? project = null,
+            int page = 1,
+            int pageSize = 50);
+    }
+}
+
+// ---------------------------------------------------------------------
+// 10. سطح دسترسی (Authorization)
+// ---------------------------------------------------------------------
+
+namespace MyApp.Application.Authorization
+{
+    /// <summary>
+    /// نقش‌های مجاز برای هر عملیات
+    /// </summary>
+    public enum AccessLevel
+    {
+        Owner,      // مالک پروژه (فقط شما)
+        StoreAdmin  // مدیر فروشگاه (Restaurant Owner)
+    }
+
+    public interface IAuthorizationService
+    {
+        Task<bool> CanAccessRestaurantAsync(Guid userId, Guid restaurantId, AccessLevel required = AccessLevel.StoreAdmin);
+        Task<bool> CanViewLogsAsync(Guid userId); // فقط Owner
+        Task<bool> IsOwnerAsync(Guid userId);
+    }
+}
+
+// ---------------------------------------------------------------------
+// 11. سرویس اعلان (Notification) – برای ارسال ایمیل، Push و غیره
+// ---------------------------------------------------------------------
+
+namespace MyApp.Application.Notifications
+{
+    public interface INotificationService
+    {
+        Task SendNewsletterAsync(Newsletter newsletter, IReadOnlyList<EmailSubscriber> subscribers);
+        Task SendContactConfirmationAsync(string email, string name);
+        Task SendPasswordResetAsync(string email, string token);
+    }
+}
+
+// ---------------------------------------------------------------------
+// 12. واحد کار (Unit of Work) – برای تراکنش‌ها
+// ---------------------------------------------------------------------
+
+namespace MyApp.Application.Common
+{
+    public interface IUnitOfWork : IDisposable
+    {
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
+    }
+}
+
+// ---------------------------------------------------------------------
+// نکات مهم پیاده‌سازی بعدی (بدون کد):
+// 1. تمام سرویس‌ها از IUnitOfWork استفاده می‌کنند.
+// 2. دسترسی به رستوران فقط با بررسی مالکیت (Restaurant.OwnerUserId == callerId یا Owner پروژه).
+// 3. لاگ‌ها فقط برای Owner قابل مشاهده → IAuthorizationService.CanViewLogsAsync
+// 4. MongoDB → Repositoryهای ژنریک با IQueryable برای فیلتر و صفحه‌بندی.
+// 5. DTOها در Presentation (MVC یا API) به مدل‌های View تبدیل می‌شوند.
+// ---------------------------------------------------------------------
