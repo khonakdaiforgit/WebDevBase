@@ -1,5 +1,4 @@
-﻿// src/Infrastructure/Common/UnitOfWork.cs
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using MyApp.Infrastructure.Common;
 using MyApp.Infrastructure.Data;
 using MyApp.Infrastructure.Repositories;
@@ -14,6 +13,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable
     public UnitOfWork(MongoDbContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
+
         Users = new UserRepository(_context);
         Restaurants = new RestaurantRepository(_context);
         MenuCategories = new MenuCategoryRepository(_context);

@@ -1,12 +1,17 @@
-﻿using MyApp.Application.DTOs;
-using MyApp.Application.Interfaces;
+﻿using MyApp.Application.Abstractions.Logging;
+using MyApp.Application.Abstractions.Logging.Dtos;
 using System.Diagnostics;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace MyApp.WebAPI.Middleware
 {
+
     public class RequestLoggingMiddleware
     {
         private readonly RequestDelegate _next;
+
         private readonly string[] _excludedExtensions = { ".css", ".js", ".png", ".jpg", ".jpeg", ".gif", ".woff", ".woff2", ".ttf", ".ico" };
         private readonly string[] _excludedPaths = { "/swagger", "/favicon.ico", "/api/logs" };
         public RequestLoggingMiddleware(RequestDelegate next)
@@ -26,63 +31,110 @@ namespace MyApp.WebAPI.Middleware
                 return;
             }
 
-            var logEntry = new LogEntryDto
-            {
-                UserId = context.User?.Identity?.Name ?? "Anonymous",
-                HashedIp = GetClientIpHashed(context),
-                UserAgent = context.Request.Headers["User-Agent"].ToString(),
-                Method = context.Request.Method,
-                Path = context.Request.Path,
-                Source = "RequestStart",
-                Project = "API"
-            };
-
             var stopwatch = Stopwatch.StartNew();
+
+            var request = context.Request;
+            var response = context.Response;
+
+            var logDto = new LogEntryDto(
+                Id: Guid.NewGuid(),
+                Timestamp: DateTime.UtcNow,
+                Level: "Info", // بعداً آپدیت می‌شه
+                Message: string.Empty,
+                ExceptionMessage: null,
+                StackTrace: null,
+                UserId: GetUserId(context),
+                HashedIp: HashIp(GetClientIp(context)),
+                Method: request.Method,
+                Path: $"{request.Path}{request.QueryString}",
+                StatusCode: 0, // بعداً آپدیت می‌شه
+                Project: "API",
+                DurationMs: null
+            );
 
             try
             {
-                // لاگ شروع درخواست
-                logService.LogRequestAsync(logEntry);
-
                 await _next(context);
-
-                // لاگ پایان درخواست (موفق)
                 stopwatch.Stop();
-                logEntry.Message = $"Request completed successfully in {stopwatch.ElapsedMilliseconds}ms";
-                logEntry.StatusCode = context.Response.StatusCode;
-                logEntry.Source = "RequestEnd";
-                logEntry.Level = "Info";
-                logService.LogRequestAsync(logEntry);
+
+                logDto = logDto with
+                {
+                    StatusCode = response.StatusCode,
+                    DurationMs = stopwatch.Elapsed.TotalMilliseconds,
+                    Level = GetLogLevel(response.StatusCode),
+                    Message = $"Request completed: {request.Method} {logDto.Path}"
+                };
             }
             catch (Exception ex)
             {
-                // لاگ خطا
                 stopwatch.Stop();
-                logEntry.Message = $"Request failed in {stopwatch.ElapsedMilliseconds}ms";
-                logEntry.ExceptionMessage = ex.Message;
-                logEntry.StackTrace = ex.StackTrace;
-                logEntry.StatusCode = 500;
-                logEntry.Source = "RequestError";
-                logEntry.Level = "Error";
-                logService.LogErrorAsync(logEntry);
 
-                throw; // پرتاب دوباره برای مدیریت خطا
+                logDto = logDto with
+                {
+                    StatusCode = 500,
+                    DurationMs = stopwatch.Elapsed.TotalMilliseconds,
+                    Level = "Error",
+                    Message = $"Request failed: {request.Method} {logDto.Path}",
+                    ExceptionMessage = ex.Message,
+                    StackTrace = ex.StackTrace
+                };
+
+                throw; // خطا رو به کلاینت برگردون
+            }
+            finally
+            {
+                _ = Task.Run(async () =>
+                {
+                    try { await logService.LogAsync(logDto); }
+                    catch (Exception ex)
+                    {
+                        // لاگ خطا در لاگ‌گیری (اختیاری)
+                        System.Diagnostics.Debug.WriteLine($"Log failed: {ex.Message}");
+                    }
+                });
             }
         }
-
-        public string GetClientIpHashed(HttpContext context)
+        private static string GetUserId(HttpContext context)
+        {
+            var claim = context.User.FindFirst(ClaimTypes.NameIdentifier);
+            return claim?.Value ?? "Anonymous";
+        }
+        private static string? GetClientIp(HttpContext context)
         {
             var ip = context.Connection.RemoteIpAddress?.ToString();
+            if (string.IsNullOrEmpty(ip) || ip == "::1") ip = "127.0.0.1";
 
-            // اگر پشت پراکسی هستی:
-            if (context.Request.Headers.ContainsKey("X-Forwarded-For"))
-            {
-                ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-            }
+            // پشت پروکسی (Cloudflare, Nginx, ...)
+            if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var forwarded))
+                ip = forwarded.ToString().Split(',')[0].Trim();
 
-            return ip;//HashIp(ip ?? "Unknown");
+            if (context.Request.Headers.TryGetValue("X-Real-IP", out var real))
+                ip = real.ToString();
+
+            return ip;
         }
 
+        private static string? HashIp(string? ip)
+        {
+            if (string.IsNullOrEmpty(ip)) return null;
 
+            using var sha256 = SHA256.Create();
+            var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(ip + "RESTAURANT_APP_SALT_2025"));
+            return Convert.ToBase64String(bytes);
+        }
+
+        private static string GetLogLevel(int statusCode) => statusCode switch
+        {
+            >= 200 and < 300 => "Info",
+            >= 400 and < 500 => "Warning",
+            >= 500 => "Error",
+            _ => "Info"
+        };
+
+        private static bool ShouldLog(string level, int? statusCode)
+        {
+            // فقط خطاها و 4xx/5xx رو لاگ کن (برای جلوگیری از حجم زیاد)
+            return level is "Error" or "Warning" || (statusCode >= 400);
+        }
     }
 }

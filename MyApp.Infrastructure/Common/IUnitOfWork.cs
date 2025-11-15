@@ -9,7 +9,6 @@ public interface IUnitOfWork : IDisposable
     IUserRepository Users { get; }
     IRestaurantRepository Restaurants { get; }
     ILogEntryRepository Logs { get; }
-
     IMenuCategoryRepository MenuCategories { get; }
     IMenuItemRepository MenuItems { get; }
     IGalleryItemRepository GalleryItems { get; }

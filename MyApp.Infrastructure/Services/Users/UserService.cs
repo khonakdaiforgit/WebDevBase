@@ -4,29 +4,25 @@ using MyApp.Application.Abstractions.Users.Dtos;
 using MyApp.Application.Common;
 using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Common;
-using MyApp.Infrastructure.Repositories.Interface;
 
 namespace MyApp.Infrastructure.Services.Users
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthorizationService _authz;
 
         public UserService(
-            IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             IAuthorizationService authz)
         {
-            _userRepository = userRepository;
             _unitOfWork = unitOfWork;
             _authz = authz;
         }
 
         public async Task<UserDto?> GetCurrentUserAsync(Guid userId)
         {
-            var user = await _userRepository.GetByIdAsync(userId);
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
             return user == null ? null : MapToDto(user);
         }
 
@@ -35,11 +31,11 @@ namespace MyApp.Infrastructure.Services.Users
             if (!await _authz.IsOwnerAsync(callerUserId))
                 throw new UnauthorizedAccessException("Only project owner can deactivate users.");
 
-            var user = await _userRepository.GetByIdAsync(targetUserId)
+            var user = await _unitOfWork.Users.GetByIdAsync(targetUserId)
                 ?? throw new KeyNotFoundException("User not found.");
 
             user.Deactivate();
-            await _userRepository.UpdateAsync(user);
+            await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -48,11 +44,11 @@ namespace MyApp.Infrastructure.Services.Users
             if (!await _authz.IsOwnerAsync(callerUserId))
                 throw new UnauthorizedAccessException("Only project owner can activate users.");
 
-            var user = await _userRepository.GetByIdAsync(targetUserId)
+            var user = await _unitOfWork.Users.GetByIdAsync(targetUserId)
                 ?? throw new KeyNotFoundException("User not found.");
 
             user.Activate();
-            await _userRepository.UpdateAsync(user);
+            await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -60,7 +56,7 @@ namespace MyApp.Infrastructure.Services.Users
         {
             var skip = (page - 1) * pageSize;
 
-            var users = await _userRepository.GetPagedAsync(
+            var users = await _unitOfWork.Users.GetPagedAsync(
                 filter: null,
                 orderBy: u => u.CreatedAt,
                 orderByDescending: true,

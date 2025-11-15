@@ -4,7 +4,6 @@ using MyApp.Application.Abstractions.Users;
 using MyApp.Application.Abstractions.Users.Dtos;
 using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Common;
-using MyApp.Infrastructure.Repositories.Interface;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -14,23 +13,20 @@ namespace MyApp.Infrastructure.Services.Auth;
 
 public class AuthService : IAuthService
 {
-    private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _config;
 
-    public AuthService(IUserRepository userRepository, IUnitOfWork unitOfWork, IConfiguration config)
+    public AuthService(
+        IUnitOfWork unitOfWork,
+        IConfiguration config)
     {
-        _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _config = config;
     }
 
     public async Task<AuthResult> LoginAsync(LoginDto dto)
     {
-        //using var session = await _unitOfWork.BeginTransactionAsync();
-        //session.StartTransaction();
-
-        var user = await _userRepository.GetByEmailAsync(dto.Email)
+        var user = await _unitOfWork.Users.GetByEmailAsync(dto.Email)
             ?? throw new UnauthorizedAccessException("Invalid credentials.");
 
         if (!user.IsActive)
@@ -44,7 +40,7 @@ public class AuthService : IAuthService
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
 
-        await _userRepository.UpdateAsync(user);
+        await _unitOfWork.Users.UpdateAsync(user);
         await _unitOfWork.SaveChangesAsync();
 
         return new AuthResult(
@@ -57,7 +53,7 @@ public class AuthService : IAuthService
 
     public async Task<AuthResult> RefreshAsync(RefreshTokenDto dto)
     {
-        var user = await _userRepository.GetByRefreshTokenAsync(dto.RefreshToken)
+        var user = await _unitOfWork.Users.GetByRefreshTokenAsync(dto.RefreshToken)
             ?? throw new UnauthorizedAccessException("Invalid refresh token.");
 
         if (user.RefreshTokenExpiry <= DateTime.UtcNow)
@@ -66,40 +62,40 @@ public class AuthService : IAuthService
         var (accessToken, refreshToken) = await GenerateTokensAsync(user);
 
         user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+        user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(Convert.ToInt32(_config["Jwt:RefreshTokenExpiryDays"]));
 
-        await _userRepository.UpdateAsync(user);
+        await _unitOfWork.Users.UpdateAsync(user);
         await _unitOfWork.SaveChangesAsync();
 
         return new AuthResult(
             AccessToken: accessToken,
             RefreshToken: refreshToken,
-            ExpiresAt: DateTime.UtcNow.AddMinutes(60),
+            ExpiresAt: DateTime.UtcNow.AddMinutes(Convert.ToInt32(_config["Jwt:AccessTokenExpiryMinutes"])),
             User: MapToDto(user)
         );
     }
 
     public async Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto)
     {
-        var user = await _userRepository.GetByIdAsync(userId)
+        var user = await _unitOfWork.Users.GetByIdAsync(userId)
             ?? throw new KeyNotFoundException("User not found.");
 
         if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash))
             throw new UnauthorizedAccessException("Current password is incorrect.");
 
         user.ChangePassword(BCrypt.Net.BCrypt.HashPassword(dto.NewPassword));
-        await _userRepository.UpdateAsync(user);
+        await _unitOfWork.Users.UpdateAsync(user);
         await _unitOfWork.SaveChangesAsync();
     }
 
     public async Task LogoutAsync(Guid userId)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
+        var user = await _unitOfWork.Users.GetByIdAsync(userId);
         if (user != null)
         {
             user.RefreshToken = null;
             user.RefreshTokenExpiry = DateTime.MinValue;
-            await _userRepository.UpdateAsync(user);
+            await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();
         }
     }
@@ -131,7 +127,7 @@ public class AuthService : IAuthService
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(60),
+            expires: DateTime.UtcNow.AddMinutes(Convert.ToInt32(_config["Jwt:AccessTokenExpiryMinutes"])),
             signingCredentials: credentials
         );
 

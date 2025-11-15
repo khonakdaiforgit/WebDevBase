@@ -1,6 +1,5 @@
 ﻿using MyApp.Application.Common;
 using MyApp.Domain.Entities;
-using System.Linq.Expressions;
 
 namespace MyApp.Infrastructure.Repositories.Interface
 {
@@ -9,21 +8,16 @@ namespace MyApp.Infrastructure.Repositories.Interface
         Task AddAsync(LogEntry entry, CancellationToken ct = default);
 
         Task<PagedResult<LogEntry>> GetPagedAsync(
-            DateTime? from = null,
-            DateTime? to = null,
-            string? level = null,
-            string? project = null,
-            string? userId = null,
-            Expression<Func<LogEntry, object>>? orderBy = null,
-            bool descending = true,
-            int page = 1,
-            int pageSize = 50,
-            CancellationToken ct = default);
+            DateTime? from,
+            DateTime? to,
+            string? level,
+            string? project,
+            string? userId,
+            int page,
+            int pageSize,
+            CancellationToken ct);
 
-        Task<int> CountAsync(
-            DateTime? from = null,
-            DateTime? to = null,
-            string? level = null,
-            CancellationToken ct = default);
+        Task<int> CountAsync(DateTime? from, DateTime? to, string? level, CancellationToken ct);
     }
 }
+

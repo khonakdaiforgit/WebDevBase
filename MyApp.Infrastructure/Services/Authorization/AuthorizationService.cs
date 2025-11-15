@@ -1,26 +1,20 @@
-﻿using Microsoft.Extensions.Configuration;
-using MyApp.Application.Abstractions.Authorization;
-using MyApp.Infrastructure.Repositories.Interface;
+﻿using MyApp.Application.Abstractions.Authorization;
+using MyApp.Infrastructure.Common;
 
 namespace MyApp.Infrastructure.Services.Authorization
 {
     public class AuthorizationService : IAuthorizationService
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IRestaurantRepository _restaurantRepository;
-
+        private readonly IUnitOfWork _unitOfWork;
         public AuthorizationService(
-            IUserRepository userRepository,
-            IRestaurantRepository restaurantRepository,
-            IConfiguration configuration)
+            IUnitOfWork unitOfWork)
         {
-            _userRepository = userRepository;
-            _restaurantRepository = restaurantRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<bool> IsOwnerAsync(Guid userId)
         {
-            var user = await _userRepository.GetByIdAsync(userId);
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
             return user?.IsProjectOwner == true;
         }
 
@@ -35,7 +29,7 @@ namespace MyApp.Infrastructure.Services.Authorization
                 return await IsOwnerAsync(userId);
 
             // StoreAdmin: مالک رستوران یا Owner پروژه
-            var isRestaurantOwner = await _restaurantRepository.IsOwnerAsync(restaurantId, userId);
+            var isRestaurantOwner = await _unitOfWork.Restaurants.IsOwnerAsync(restaurantId, userId);
             var isProjectOwner = await IsOwnerAsync(userId);
 
             return isRestaurantOwner || isProjectOwner;

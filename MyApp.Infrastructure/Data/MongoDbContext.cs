@@ -9,14 +9,6 @@ public class MongoDbContext
     private readonly IMongoDatabase _database;
     private readonly IMongoClient _client; // اضافه شد!
 
-    public MongoDbContext(string connectionString, string databaseName)
-    {
-        var settings = MongoClientSettings.FromConnectionString(connectionString);
-        //settings.GuidRepresentation = GuidRepresentation.Standard;
-        _client = new MongoClient(settings);
-        _database = _client.GetDatabase(databaseName);
-    }
-
     public MongoDbContext(IMongoClient client, string databaseName)
     {
         _client = client;

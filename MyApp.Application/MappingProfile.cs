@@ -22,8 +22,8 @@ namespace MyApp.Application
             CreateMap<Restaurant, RestaurantListItemDto>();
 
             CreateMap<CreateRestaurantDto, Restaurant>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src => src.LogoUrl ?? string.Empty));
+                  .ForMember(dest => dest.Location, opt => opt.Ignore())
+                  .ForMember(dest => dest.WorkingHours, opt => opt.Ignore());
 
             CreateMap<UpdateRestaurantDto, Restaurant>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
