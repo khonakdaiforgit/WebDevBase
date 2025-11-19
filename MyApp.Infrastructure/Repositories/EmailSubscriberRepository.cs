@@ -1,5 +1,4 @@
-﻿// src/Infrastructure/Repositories/EmailSubscriberRepository.cs
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Data;
 using MyApp.Infrastructure.Repositories.Common;

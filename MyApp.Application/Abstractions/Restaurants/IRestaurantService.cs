@@ -1,5 +1,4 @@
 ﻿using MyApp.Application.Abstractions.Restaurants.Dtos;
-using MyApp.Application.Common;
 
 namespace MyApp.Application.Abstractions.Restaurants;
 

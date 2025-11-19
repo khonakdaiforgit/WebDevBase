@@ -8,5 +8,6 @@
         public string Password { get; set; } = "";
         public string From { get; set; } = "no-reply@myapp.com";
         public bool EnableSsl { get; set; } = true;
+        public string FromName { get; set; } = "Restaurant";
     }
 }

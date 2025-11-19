@@ -2,23 +2,18 @@
 using MyApp.Application.Common;
 using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Data;
+using MyApp.Infrastructure.Repositories.Common;
 using MyApp.Infrastructure.Repositories.Interface;
 
 namespace MyApp.Infrastructure.Repositories;
 
-public class LogEntryRepository : ILogEntryRepository
+public class LogEntryRepository : GenericRepository<LogEntry>, ILogEntryRepository
 {
-    private readonly IMongoCollection<LogEntry> _collection;
-
-    public LogEntryRepository(MongoDbContext context)
+    public LogEntryRepository(MongoDbContext context) : base(context)
     {
-        _collection = context.Logs;
     }
 
-    public async Task AddAsync(LogEntry entry, CancellationToken ct = default)
-        => await _collection.InsertOneAsync(entry, cancellationToken: ct);
-
-    public async Task<PagedResult<LogEntry>> GetPagedAsync(
+    public async Task<PagedResult<LogEntry>> GetLogPagedAsync(
         DateTime? from = null,
         DateTime? to = null,
         string? level = null,
@@ -52,7 +47,7 @@ public class LogEntryRepository : ILogEntryRepository
 
         return new PagedResult<LogEntry>(items, (int)total, page, pageSize);
     }
-    public async Task<int> CountAsync(DateTime? from, DateTime? to, string? level, CancellationToken ct = default)
+    public async Task<int> LogCountAsync(DateTime? from, DateTime? to, string? level, CancellationToken ct = default)
     {
         var filter = Builders<LogEntry>.Filter.Empty;
         if (from.HasValue) filter &= Builders<LogEntry>.Filter.Gte(x => x.Timestamp, from.Value);

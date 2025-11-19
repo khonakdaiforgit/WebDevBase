@@ -1,5 +1,4 @@
-﻿// src/Infrastructure/Repositories/GalleryItemRepository.cs
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using MyApp.Application.Common;
 using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Data;

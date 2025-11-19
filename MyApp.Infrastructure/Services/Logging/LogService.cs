@@ -31,7 +31,7 @@ public class LogService : ILogService
         int pageSize = 50,
         CancellationToken ct = default)
     {
-        var paged = await _unitOfWork.Logs.GetPagedAsync(
+        var paged = await _unitOfWork.Logs.GetLogPagedAsync(
             from: from,
             to: to,
             level: level,
@@ -51,7 +51,7 @@ public class LogService : ILogService
         string? level = null,
         CancellationToken ct = default)
     {
-        return await _unitOfWork.Logs.CountAsync(from, to, level, ct);
+        return await _unitOfWork.Logs.LogCountAsync(from, to, level, ct);
     }
 
     private static LogEntryDto MapToDto(LogEntry log) => new(
