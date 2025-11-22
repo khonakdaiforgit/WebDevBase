@@ -1,7 +1,9 @@
-﻿using MyApp.WebAPI.Extensions;
+﻿using AutoMapper;
+using MyApp.WebAPI.Extensions;
 using MyApp.WebAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // === 1. Configuration ===
 builder.Configuration
@@ -13,6 +15,7 @@ builder.Services.AddMongoDb(builder.Configuration);
 
 // 3. AutoMapper + HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddAutoMapper(typeof(MyApp.Application.AutoMapperProfile));
 
 // 4. همه سرویس‌های اپلیکیشن
@@ -30,6 +33,10 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+
+var mapper = app.Services.GetRequiredService<IMapper>();
+mapper.ConfigurationProvider.AssertConfigurationIsValid(); // ← اگر خطا داد، نشون می‌ده کدوم مپ مشکل داره
+
 // === Middleware ===
 if (app.Environment.IsDevelopment())
 {
@@ -44,11 +51,10 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-
 app.UseMiddleware<RequestLoggingMiddleware>();
 
 await app.SeedDataAsync();
 
 app.Run();
 
-public partial class Program { }
+//public partial class Program { }

@@ -13,7 +13,9 @@ public class UsersController : ControllerBase
     private readonly IUserService _userService;
     private readonly IAuthorizationService _authz;
 
-    public UsersController(IUserService userService, IAuthorizationService authz)
+    public UsersController(
+        IUserService userService, 
+        IAuthorizationService authz)
     {
         _userService = userService;
         _authz = authz;

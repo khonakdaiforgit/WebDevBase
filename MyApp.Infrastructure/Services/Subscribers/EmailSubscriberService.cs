@@ -1,5 +1,4 @@
-﻿// src/Application/Services/EmailSubscriberService.cs
-using AutoMapper;
+﻿using AutoMapper;
 using MyApp.Application.Abstractions.Subscribers;
 using MyApp.Application.Abstractions.Subscribers.Dtos;
 using MyApp.Application.Abstractions.Users;

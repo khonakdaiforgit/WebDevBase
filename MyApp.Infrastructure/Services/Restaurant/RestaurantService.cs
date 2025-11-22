@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MyApp.Application.Abstractions.Restaurants;
 using MyApp.Application.Abstractions.Restaurants.Dtos;
+using MyApp.Domain.ValueObjects;
 using MyApp.Infrastructure.Common;
 using MyApp.Infrastructure.Common.Exceptions;
 
@@ -12,7 +13,7 @@ namespace MyApp.Infrastructure.Services.Restaurant
         private readonly IMapper _mapper;
 
         public RestaurantService(
-            IUnitOfWork unitOfWork, 
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
             _unitOfWork = unitOfWork;
@@ -32,7 +33,14 @@ namespace MyApp.Infrastructure.Services.Restaurant
             };
 
             restaurant.SetLocation(dto.Latitude, dto.Longitude);
-            restaurant.UpdateHours(dto.WorkingHours);
+
+            // استفاده از متد استاتیک Create
+            restaurant.WorkingHours = WorkingHours.Create(
+                dto.WorkingHours.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => (kvp.Value.Open, kvp.Value.Close)
+                )
+            );
 
             await _unitOfWork.Restaurants.AddAsync(restaurant);
             await _unitOfWork.SaveChangesAsync();
@@ -84,7 +92,13 @@ namespace MyApp.Infrastructure.Services.Restaurant
         public async Task UpdateWorkingHoursAsync(UpdateWorkingHoursDto dto, Guid callerUserId)
         {
             var restaurant = await GetRestaurantOrThrowAsync(dto.RestaurantId, callerUserId);
-            restaurant.UpdateHours(dto.WorkingHours);
+
+            restaurant.WorkingHours = WorkingHours.Create(
+                dto.WorkingHours.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => (kvp.Value.Open, kvp.Value.Close)
+                )
+            );
 
             await _unitOfWork.Restaurants.UpdateAsync(restaurant);
             await _unitOfWork.SaveChangesAsync();
@@ -93,6 +107,13 @@ namespace MyApp.Infrastructure.Services.Restaurant
         public async Task<bool> IsOwnerAsync(Guid restaurantId, Guid userId)
         {
             return await _unitOfWork.Restaurants.IsOwnerAsync(restaurantId, userId);
+        }
+
+        public async Task<RestaurantDto?> GetByOwnerIdAsync(Guid ownerUserId)
+        {
+            var restaurant = await _unitOfWork.Restaurants.GetByOwnerAsync(ownerUserId);
+
+            return restaurant == null ? null : _mapper.Map<RestaurantDto>(restaurant.FirstOrDefault());
         }
 
         // --- متد کمکی ---
@@ -107,6 +128,19 @@ namespace MyApp.Infrastructure.Services.Restaurant
                 throw new ForbiddenException("You are not the owner of this restaurant.");
 
             return restaurant;
+        }
+
+        public async Task<RestaurantDto> GetMainRestaurantAsync()
+        {
+            var restaurant = await _unitOfWork.Restaurants.GetMain();
+
+            return _mapper.Map<RestaurantDto>(restaurant);
+        }
+        public async Task<PublicRestaurantDto> GetPublicInfo()
+        {
+            var restaurant = await _unitOfWork.Restaurants.GetMain();
+
+            return _mapper.Map<PublicRestaurantDto>(restaurant);
         }
     }
 }

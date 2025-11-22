@@ -1,5 +1,4 @@
-using MyApp.Domain.ValueObjects;
-
+﻿
 namespace MyApp.Application.Abstractions.Restaurants.Dtos;
 
 public record CreateRestaurantDto(
@@ -10,4 +9,5 @@ public record CreateRestaurantDto(
     string Phone,
     string Email,
     string? LogoUrl,
-    WorkingHours WorkingHours);
+    Dictionary<string, (TimeSpan Open, TimeSpan Close)> WorkingHours
+    ); // تغییر نوع

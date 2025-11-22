@@ -1,0 +1,52 @@
+﻿@model MyApp.WebMVC.Views.Dashboard.ViewModels.DashboardIndexViewModel
+@{
+    ViewData["Title"] = "Dashboard - " + Model.Name;
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        Welcome back, <strong>@Model.Name</strong>
+    </h1>
+    <span class="badge badge-lg @(Model.IsOpenNow ? "bg-success" : "bg-danger") fs-5 px-4 py-2">
+        <i class="fas fa-circle @(Model.IsOpenNow ? "fa-beat" : "")"></i>
+        @(Model.IsOpenNow ? "We're Open" : "Closed Now")
+    </span>
+</div>
+
+<div class="alert alert-info">
+    <i class="fas fa-clock"></i> 
+    <strong>Today's Hours:</strong> @Model.TodayHoursDisplay
+</div>
+
+<div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Today's Visits</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalVisitsToday</div>
+            </div>
+        </div>
+    </div>
+    <!-- بقیه کارت‌ها... -->
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex align-items-center">
+                @if (!string.IsNullOrEmpty(Model.LogoUrl))
+                {
+                    <img src="@Model.LogoUrl" class="me-3 rounded-circle" style="width:50px;height:50px;object-fit:cover;" />
+                }
+                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <a asp-controller="Menu" asp-action="Index" class="btn btn-primary me-2">Manage Menu</a>
+                <a asp-controller="Gallery" asp-action="Index" class="btn btn-success me-2">Photo Gallery</a>
+            </div>
+        </div>
+    </div>
+</div>

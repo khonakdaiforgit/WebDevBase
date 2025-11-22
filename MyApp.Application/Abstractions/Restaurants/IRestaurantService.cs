@@ -11,4 +11,7 @@ public interface IRestaurantService
     Task UpdateLogoAsync(UpdateLogoDto dto, Guid callerUserId);
     Task UpdateWorkingHoursAsync(UpdateWorkingHoursDto dto, Guid callerUserId);
     Task<bool> IsOwnerAsync(Guid restaurantId, Guid userId);
+    Task<RestaurantDto?> GetByOwnerIdAsync(Guid ownerUserId);
+    Task<RestaurantDto> GetMainRestaurantAsync();
+    Task<PublicRestaurantDto> GetPublicInfo();
 }

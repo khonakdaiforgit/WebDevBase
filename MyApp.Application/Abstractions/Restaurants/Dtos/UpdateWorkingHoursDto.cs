@@ -1,6 +1,8 @@
-using MyApp.Domain.ValueObjects;
+﻿namespace MyApp.Application.Abstractions.Restaurants.Dtos
 
-namespace MyApp.Application.Abstractions.Restaurants.Dtos
 {
-    public record UpdateWorkingHoursDto(Guid RestaurantId, WorkingHours WorkingHours);
+    public record UpdateWorkingHoursDto(
+        Guid RestaurantId,
+        Dictionary<string, (TimeSpan Open, TimeSpan Close)> WorkingHours // تغییر نوع
+    );
 }

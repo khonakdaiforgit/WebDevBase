@@ -17,6 +17,13 @@ public class RestaurantRepository : GenericRepository<Restaurant>, IRestaurantRe
             .ToListAsync(ct);
     }
 
+    public async Task<Restaurant> GetMain()
+    {
+        return await _collection
+                  .Find(r => r.Mian==true)
+                  .FirstOrDefaultAsync();
+    }
+
     public async Task<bool> IsOwnerAsync(Guid restaurantId, Guid userId, CancellationToken ct = default)
     {
         var count = await _collection

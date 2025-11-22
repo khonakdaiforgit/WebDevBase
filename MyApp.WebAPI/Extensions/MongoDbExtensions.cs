@@ -15,7 +15,6 @@ namespace MyApp.WebAPI.Extensions
             BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
             services.Configure<SmtpSettings>(config.GetSection("Smtp"));
-            services.Configure<AppSettings>(config.GetSection("App"));
 
             services.AddSingleton<IMongoClient>(sp =>
                 new MongoClient(MongoClientSettings.FromConnectionString(

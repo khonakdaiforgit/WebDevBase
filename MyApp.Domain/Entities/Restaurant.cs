@@ -12,9 +12,9 @@ namespace MyApp.Domain.Entities
         public string Phone { get;  set; }
         public string Email { get;  set; }
         public string LogoUrl { get;  set; }
-        public WorkingHours WorkingHours { get;  set; }
-
+        public WorkingHours WorkingHours { get; set; } = WorkingHours.Create(new());
         public Guid OwnerUserId { get; set; } // مالک رستوران
+        public bool? Mian { get; set; }
 
         // رفتار دامنه (Domain Behavior)
         public void SetOwner(Guid ownerUserId) => OwnerUserId = ownerUserId;
