@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Abstractions.Restaurants.Dtos;
+using MyApp.WebMVC.Extensions;
 using MyApp.WebMVC.Views.Restaurant.ViewModels;
 using System.Net;
 using System.Text.Json;
@@ -20,12 +21,12 @@ public class RestaurantController : Controller
         _mapper = mapper;
     }
 
-    private HttpClient Api => _http.CreateClient("ApiClient"); // همون نامی که در Program.cs تعریف کردی
+    protected HttpClient Api() => _http.CreateClient("ApiClient").WithJwt(this);
 
     // GET: /Restaurant/Profile
     public async Task<IActionResult> Profile()
     {
-        var response = await Api.GetAsync("api/restaurant/profile");
+        var response = await Api().GetAsync("api/restaurant/profile");
 
         if (!response.IsSuccessStatusCode)
         {
@@ -47,9 +48,19 @@ public class RestaurantController : Controller
         if (!ModelState.IsValid)
             return View(model);
 
-        var dto = _mapper.Map<UpdateRestaurantDto>(model);
+        var updateDto = new UpdateRestaurantDto(
+            Id: model.Id,
+            Name: model.Name,
+            Address: model.Address,
+            Latitude: model.Latitude,
+            Longitude: model.Longitude,
+            Phone: model.Phone,
+            Email: model.Email,
+            LogoUrl: model.LogoUrl,
+            WorkingHours: new Dictionary<string, TimeRangeDto>() 
+        );
 
-        var response = await Api.PutAsJsonAsync("api/restaurant", dto);
+        var response = await Api().PutAsJsonAsync("api/restaurant", updateDto);
 
         if (response.IsSuccessStatusCode)
         {
@@ -75,7 +86,7 @@ public class RestaurantController : Controller
     // GET: /Restaurant/WorkingHours
     public async Task<IActionResult> WorkingHours()
     {
-        var response = await Api.GetAsync("api/restaurant/profile");
+        var response = await Api().GetAsync("api/restaurant/profile");
 
         if (!response.IsSuccessStatusCode)
         {
@@ -128,7 +139,7 @@ public class RestaurantController : Controller
 
         var dto = new UpdateWorkingHoursDto(model.RestaurantId, dict);
 
-        var response = await Api.PatchAsJsonAsync("api/restaurant/working-hours", dto);
+        var response = await Api().PatchAsJsonAsync("api/restaurant/working-hours", dto);
 
         if (response.IsSuccessStatusCode)
         {
@@ -151,7 +162,7 @@ public class RestaurantController : Controller
         using var stream = file.OpenReadStream();
         content.Add(new StreamContent(stream), "file", file.FileName);
 
-        var response = await Api.PostAsync("api/upload/logo", content); // باید این اندپوینت رو بعداً بسازی
+        var response = await Api().PostAsync("api/upload/logo", content); // باید این اندپوینت رو بعداً بسازی
 
         if (response.IsSuccessStatusCode)
         {

@@ -1,5 +1,3 @@
-using MyApp.Domain.ValueObjects;
-
 namespace MyApp.Application.Abstractions.Restaurants.Dtos;
 
 public record UpdateRestaurantDto(
@@ -11,4 +9,5 @@ public record UpdateRestaurantDto(
     string? Phone,
     string? Email,
     string? LogoUrl,
-    WorkingHours? WorkingHours);
+    Dictionary<string, TimeRangeDto> WorkingHours
+);

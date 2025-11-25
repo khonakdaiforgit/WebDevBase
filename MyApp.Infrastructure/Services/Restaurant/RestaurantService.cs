@@ -4,6 +4,7 @@ using MyApp.Application.Abstractions.Restaurants.Dtos;
 using MyApp.Domain.ValueObjects;
 using MyApp.Infrastructure.Common;
 using MyApp.Infrastructure.Common.Exceptions;
+using MyApp.Application.Abstractions.Restaurants.Extensions;
 
 namespace MyApp.Infrastructure.Services.Restaurant
 {
@@ -57,7 +58,10 @@ namespace MyApp.Infrastructure.Services.Restaurant
             if (dto.Phone != null) restaurant.Phone = dto.Phone;
             if (dto.Email != null) restaurant.Email = dto.Email;
             if (dto.LogoUrl != null) restaurant.UpdateLogo(dto.LogoUrl);
-            if (dto.WorkingHours != null) restaurant.UpdateHours(dto.WorkingHours);
+            //if (dto.WorkingHours is { Count: > 0 })
+            //{
+            //    restaurant.WorkingHours = WorkingHours.Create(dto.WorkingHours.ToDomainDictionary());
+            //}
             if (dto.Latitude.HasValue && dto.Longitude.HasValue)
                 restaurant.SetLocation(dto.Latitude.Value, dto.Longitude.Value);
 

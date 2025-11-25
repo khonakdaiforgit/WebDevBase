@@ -7,21 +7,22 @@ namespace MyApp.WebMVC.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IHttpClientFactory _clientFactory;
+        private readonly IHttpClientFactory _http;
         private readonly IMapper _mapper;
 
         public HomeController(
             IHttpClientFactory clientFactory,
             IMapper mapper)
         {
-            _clientFactory = clientFactory;
+            _http = clientFactory;
             _mapper = mapper;   
         }
 
+        protected HttpClient Api() => _http.CreateClient("ApiClient");
+
         public async Task<IActionResult> Index()
         {
-            var client = _clientFactory.CreateClient("ApiClient");
-            var dto = await client.GetFromJsonAsync<PublicRestaurantDto>("api/public/info");
+            var dto = await Api().GetFromJsonAsync<PublicRestaurantDto>("api/public/info");
 
             var viewModel = dto is not null
                 ? _mapper.Map<HomeIndexViewModel>(dto)

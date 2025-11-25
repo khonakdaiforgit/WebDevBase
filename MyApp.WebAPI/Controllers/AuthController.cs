@@ -38,10 +38,10 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
-    [HttpGet("keep-alive")]
-    [Authorize] 
-    public IActionResult KeepAlive()
-    {
-        return Ok(new { alive = true, time = DateTime.UtcNow });
-    }
+    //[HttpGet("keep-alive")]
+    //[Authorize] 
+    //public IActionResult KeepAlive()
+    //{
+    //    return Ok(new { alive = true, time = DateTime.UtcNow });
+    //}
 }

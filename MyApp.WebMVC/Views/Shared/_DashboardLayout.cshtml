@@ -162,7 +162,7 @@
                 </nav>
                 <!-- End of Topbar -->
                 <!-- Begin Page Content -->
-                <div class="container-fluid">
+                <div class="container-fluid" style="margin-bottom:250px">
                     @RenderBody()
                 </div>
                 <!-- /.container-fluid -->
@@ -197,7 +197,7 @@
 
     @await RenderSectionAsync("Scripts", required: false)
 
-    <script>
+@*     <script>
         setInterval(async () => {
             try {
                 await fetch('/Account/KeepAlive', {
@@ -208,7 +208,7 @@
                 console.warn('KeepAlive failed');
             }
         }, 0.5 * 60 * 1000); // 8 دقیقه
-    </script>
+    </script> *@
 
 </body>
 </html>

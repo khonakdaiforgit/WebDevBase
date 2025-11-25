@@ -1,14 +1,15 @@
 ﻿using MyApp.Application;
+using MyApp.WebMVC.Models;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
 namespace MyApp.WebMVC.Infrastructure
 {
-    public class RefreshTokenHandler : DelegatingHandler
+    public class TokenHandler : DelegatingHandler
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public RefreshTokenHandler(IHttpContextAccessor httpContextAccessor)
+        public TokenHandler(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
         }
@@ -30,18 +31,18 @@ namespace MyApp.WebMVC.Infrastructure
 
             var response = await base.SendAsync(request, cancellationToken);
 
-            // اگر 401 بود → سعی کن رفرش کنی
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized
-                && !string.IsNullOrEmpty(refreshToken))
-            {
-                var newTokens = await TryRefreshTokenAsync(refreshToken, context);
-                if (newTokens != null)
-                {
-                    // دوباره درخواست اصلی رو با توکن جدید بفرست
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", newTokens.AccessToken);
-                    response = await base.SendAsync(request, cancellationToken);
-                }
-            }
+            //// اگر 401 بود → سعی کن رفرش کنی
+            //if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized
+            //    && !string.IsNullOrEmpty(refreshToken))
+            //{
+            //    var newTokens = await TryRefreshTokenAsync(refreshToken, context);
+            //    if (newTokens != null)
+            //    {
+            //        // دوباره درخواست اصلی رو با توکن جدید بفرست
+            //        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", newTokens.AccessToken);
+            //        response = await base.SendAsync(request, cancellationToken);
+            //    }
+            //}
 
             return response;
         }
@@ -84,5 +85,4 @@ namespace MyApp.WebMVC.Infrastructure
         }
     }
 
-    public record AuthResponse(string AccessToken, string RefreshToken, DateTime ExpiresAt);
 }

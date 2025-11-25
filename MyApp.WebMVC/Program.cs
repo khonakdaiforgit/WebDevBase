@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MyApp.Application;
-using MyApp.WebMVC.Infrastructure;
 using MyApp.WebMVC.Mapping;
+using MyApp.WebMVC.Middlewares;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,15 +14,10 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAutoMapper(typeof(MvcMappingProfile));
 
-builder.Services.AddTransient<RefreshTokenHandler>();
-
-// HttpClient با Refresh Token خودکار
 builder.Services.AddHttpClient("ApiClient", client =>
 {
     client.BaseAddress = new Uri(AppUrl.GetApiUrl());
-})
-.AddHttpMessageHandler<RefreshTokenHandler>();
-
+});
 
 // === JWT Authentication از API ===
 builder.Services.AddAuthentication(options =>
@@ -78,6 +73,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseMiddleware<JwtRefreshMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

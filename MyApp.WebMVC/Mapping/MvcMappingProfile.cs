@@ -15,11 +15,11 @@ namespace MyApp.WebMVC.Mapping
 
             CreateMap<RestaurantDto, RestaurantProfileViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src => src.LogoUrl));
+                .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src => src.LogoUrl)).ReverseMap();
 
             CreateMap<RestaurantProfileViewModel, UpdateRestaurantDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.WorkingHours, opt => opt.Ignore());
+                .ForMember(dest => dest.WorkingHours, opt => opt.Ignore()).ReverseMap();
         }
     }
 }
