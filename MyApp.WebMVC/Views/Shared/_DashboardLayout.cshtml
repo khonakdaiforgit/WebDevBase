@@ -82,6 +82,21 @@
                     <span>News & Events</span>
                 </a>
             </li>
+            <!-- Restaurant Profile -->
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Restaurant" && ViewContext.RouteData.Values["action"]?.ToString() == "Profile" ? "active" : "")">
+                <a class="nav-link" href="/Restaurant/Profile">
+                    <i class="fas fa-store"></i>
+                    <span>Restaurant Profile</span>
+                </a>
+            </li>
+
+            <!-- Working Hours -->
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Restaurant" && ViewContext.RouteData.Values["action"]?.ToString() == "WorkingHours" ? "active" : "")">
+                <a class="nav-link" href="/Restaurant/WorkingHours">
+                    <i class="fas fa-clock"></i>
+                    <span>Working Hours</span>
+                </a>
+            </li>
 
             <!-- Logs -->
             <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Logs" ? "active" : "")">
@@ -181,5 +196,19 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        setInterval(async () => {
+            try {
+                await fetch('/Account/KeepAlive', {
+                    credentials: 'include'
+                });
+                console.log('Session kept alive');
+            } catch (e) {
+                console.warn('KeepAlive failed');
+            }
+        }, 0.5 * 60 * 1000); // 8 دقیقه
+    </script>
+
 </body>
 </html>

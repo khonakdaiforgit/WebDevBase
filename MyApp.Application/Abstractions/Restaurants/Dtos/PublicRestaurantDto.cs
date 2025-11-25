@@ -11,6 +11,8 @@ namespace MyApp.Application.Abstractions.Restaurants.Dtos
         public string Name { get; init; } = null!;
         public string? LogoUrl { get; init; }
         public string Address { get; init; } = null!;
+        public double Latitude { get; init; }
+        public double Longitude { get; init; }
         public string Phone { get; init; } = null!;
         public string Email { get; init; } = null!;
         public bool IsOpenNow { get; init; }

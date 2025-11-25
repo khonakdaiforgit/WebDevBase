@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MyApp.Application.Abstractions.Contacts.Dtos;
 using MyApp.Application.Abstractions.Logging.Dtos;
+using MyApp.Application.Abstractions.Menus.Dtos;
 using MyApp.Application.Abstractions.Restaurants.Dtos;
 using MyApp.Application.Abstractions.Restaurants.Mapping;
 using MyApp.Application.Abstractions.Users.Dtos;
@@ -18,54 +19,58 @@ namespace MyApp.Application
             // ===== Restaurant =====
             // Entity → DTO (برای نمایش)
             CreateMap<Restaurant, RestaurantDto>()
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(c => c.Location.Latitude))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(c => c.Location.Longitude))
                 .ForMember(dest => dest.WorkingHours, opt => opt.MapFrom<WorkingHoursResolver<RestaurantDto>>());
 
-            CreateMap<IEnumerable<Restaurant>, IEnumerable<RestaurantDto>>();
+            //CreateMap<IEnumerable<Restaurant>, IEnumerable<RestaurantDto>>();
 
-            CreateMap<Restaurant, RestaurantListItemDto>();
+            //CreateMap<Restaurant, RestaurantListItemDto>();
 
             CreateMap<Restaurant, PublicRestaurantDto>()
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(c => c.Location.Latitude))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(c => c.Location.Longitude))
                 .ForMember(dest => dest.IsOpenNow, opt => opt.MapFrom(src => src.WorkingHours.IsOpenNow()))
                 .ForMember(dest => dest.TodayHoursDisplay, opt => opt.MapFrom(src => src.WorkingHours.GetTodayHours()))
                 .ForMember(dest => dest.WorkingHours, opt => opt.MapFrom<WorkingHoursResolver<PublicRestaurantDto>>());
 
 
 
-            // Create DTO → Entity
-            CreateMap<CreateRestaurantDto, Restaurant>()
-                .ForMember(dest => dest.Mian, opt => opt.Ignore())  // ← این خط
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.OwnerUserId, opt => opt.Ignore())
-                .ForMember(dest => dest.Location, opt => opt.MapFrom(src =>
-                    Location.Create(src.Latitude, src.Longitude)))
-                .ForMember(dest => dest.WorkingHours, opt => opt.MapFrom(src =>
-                    WorkingHours.Create(src.WorkingHours)));
+            //// Create DTO → Entity
+            //CreateMap<CreateRestaurantDto, Restaurant>()
+            //    .ForMember(dest => dest.Mian, opt => opt.Ignore())  // ← این خط
+            //    .ForMember(dest => dest.Id, opt => opt.Ignore())
+            //    .ForMember(dest => dest.OwnerUserId, opt => opt.Ignore())
+            //    .ForMember(dest => dest.Location, opt => opt.MapFrom(src =>
+            //        Location.Create(src.Latitude, src.Longitude)))
+            //    .ForMember(dest => dest.WorkingHours, opt => opt.MapFrom(src =>
+            //        WorkingHours.Create(src.WorkingHours)));
 
-            // Update DTO → Entity (فقط فیلدهای غیر null آپدیت بشن)
-            CreateMap<UpdateRestaurantDto, Restaurant>()
-              .ForMember(dest => dest.Mian, opt => opt.Ignore())  // ← این خط
-              .ForMember(dest => dest.OwnerUserId, opt => opt.Ignore())
-              .ForMember(dest => dest.Location, opt => opt.MapFrom(src =>
-                  src.Latitude.HasValue && src.Longitude.HasValue
-                      ? Location.Create(src.Latitude.Value, src.Longitude.Value)
-                      : null))
-               .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+            //// Update DTO → Entity (فقط فیلدهای غیر null آپدیت بشن)
+            //CreateMap<UpdateRestaurantDto, Restaurant>()
+            //  .ForMember(dest => dest.Mian, opt => opt.Ignore())  // ← این خط
+            //  .ForMember(dest => dest.OwnerUserId, opt => opt.Ignore())
+            //  .ForMember(dest => dest.Location, opt => opt.MapFrom(src =>
+            //      src.Latitude.HasValue && src.Longitude.HasValue
+            //          ? Location.Create(src.Latitude.Value, src.Longitude.Value)
+            //          : null))
+            //   .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
-            // Update Logo
-            CreateMap<UpdateLogoDto, Restaurant>()
-                .ForMember(dest => dest.Mian, opt => opt.Ignore())  // ← این خط
-                .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src => src.LogoUrl))
-                .ForAllMembers(opt => opt.Ignore()); // فقط LogoUrl آپدیت بشه
+            //// Update Logo
+            //CreateMap<UpdateLogoDto, Restaurant>()
+            //    .ForMember(dest => dest.Mian, opt => opt.Ignore())  // ← این خط
+            //    .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src => src.LogoUrl))
+            //    .ForAllMembers(opt => opt.Ignore()); // فقط LogoUrl آپدیت بشه
 
-            // Update Working Hours
-            CreateMap<UpdateWorkingHoursDto, Restaurant>()
-                .ForMember(dest => dest.Mian, opt => opt.Ignore())  // ← این خط
-                .ForMember(dest => dest.WorkingHours, opt => opt.MapFrom(src =>
-                    WorkingHours.Create(src.WorkingHours)))
-                .ForAllMembers(opt => opt.Ignore());
+            //// Update Working Hours
+            //CreateMap<UpdateWorkingHoursDto, Restaurant>()
+            //    .ForMember(dest => dest.Mian, opt => opt.Ignore())  // ← این خط
+            //    .ForMember(dest => dest.WorkingHours, opt => opt.MapFrom(src =>
+            //        WorkingHours.Create(src.WorkingHours)))
+            //    .ForAllMembers(opt => opt.Ignore());
 
             // ===== MenuCategory & MenuItem =====
-            //CreateMap<MenuCategory, MenuCategoryDto>();
+            //CreateMap<MenuCategory, MenuCategoryDto>().ReverseMap();
             //CreateMap<MenuItem, MenuItemDto>();
 
             //CreateMap<CreateCategoryDto, MenuCategory>()

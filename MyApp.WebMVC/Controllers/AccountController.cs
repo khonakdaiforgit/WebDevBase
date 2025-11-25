@@ -70,6 +70,66 @@ namespace MyApp.WebMVC.Controllers
             Response.Cookies.Delete("refresh_token");
             return Redirect("/Account/Login");
         }
+
+        // در AccountController.cs — این متد رو اضافه کن
+        [HttpGet]
+        public async Task<IActionResult> KeepAlive()
+        {
+            // اول سعی کن به API بری با توکن فعلی
+            var client = _clientFactory.CreateClient("ApiClient");
+            var response = await client.GetAsync("api/auth/keep-alive");
+
+            if (response.IsSuccessStatusCode)
+            {
+                // توکن هنوز زنده است → هیچ کاری نکن
+                return Content("OK");
+            }
+
+            // اگر 401 بود → یعنی access token expire شده → refresh کن!
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                var refreshToken = Request.Cookies["refresh_token"];
+                if (string.IsNullOrEmpty(refreshToken))
+                {
+                    return RedirectToAction("Login");
+                }
+
+                var refreshContent = new StringContent(
+                    JsonSerializer.Serialize(new { refreshToken }),
+                    Encoding.UTF8, "application/json");
+
+                var refreshResponse = await client.PostAsync("api/auth/refresh", refreshContent);
+
+                if (refreshResponse.IsSuccessStatusCode)
+                {
+                    var result = await refreshResponse.Content.ReadFromJsonAsync<AuthResponse>();
+
+                    // کوکی‌های جدید رو ست کن
+                    Response.Cookies.Append("access_token", result!.AccessToken, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = result.ExpiresAt
+                    });
+
+                    Response.Cookies.Append("refresh_token", result.RefreshToken, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = DateTimeOffset.UtcNow.AddDays(30)
+                    });
+
+                    return Content("REFRESHED");
+                }
+            }
+
+            // اگر همه چیز شکست → برو لاگین
+            Response.Cookies.Delete("access_token");
+            Response.Cookies.Delete("refresh_token");
+            return RedirectToAction("Login");
+        }
     }
 }
 

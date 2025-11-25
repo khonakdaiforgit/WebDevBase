@@ -1,4 +1,4 @@
-html {
+﻿html {
   font-size: 14px;
 }
 
@@ -20,3 +20,60 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+
+.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background: #000; /* fallback */
+}
+
+.hero-bg {
+    background: url('/photos/B18I6807-crop-large.jpeg') center/cover no-repeat fixed;
+}
+
+.hero-overlay {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+}
+
+@media (max-width: 768px) {
+    .hero-bg {
+        background-attachment: scroll;
+    }
+
+    .hero h1 {
+        font-size: 3.5rem;
+    }
+}
+
+/* افکت نرم ورود */
+.hero-content {
+    animation: fadeInUp 1.2s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(0, 50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.text-shadow {
+    text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+}
+
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3) !important;
+    }

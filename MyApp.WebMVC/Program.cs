@@ -48,13 +48,16 @@ builder.Services.AddAuthentication(options =>
     {
         OnMessageReceived = context =>
         {
-            var accessToken = context.Request.Cookies["access_token"];
+            // اول از هدر بگیره
+            var token = context.Request.Headers.Authorization
+                .FirstOrDefault()?.Replace("Bearer ", "");
 
-            // اگر توکن در کوکی بود → به هدر اضافه کن
-            if (!string.IsNullOrEmpty(accessToken))
-            {
-                context.Token = accessToken;
-            }
+            // اگر نبود، از کوکی بگیره
+            if (string.IsNullOrEmpty(token))
+                token = context.Request.Cookies["access_token"];
+
+            if (!string.IsNullOrEmpty(token))
+                context.Token = token;
 
             return Task.CompletedTask;
         }

@@ -1,5 +1,7 @@
-﻿using MyApp.Application.Abstractions.Menus;
+﻿using AutoMapper;
+using MyApp.Application.Abstractions.Menus;
 using MyApp.Application.Abstractions.Menus.Dtos;
+using MyApp.Application.Abstractions.Restaurants.Dtos;
 using MyApp.Application.Abstractions.Users;
 using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Common;
@@ -11,11 +13,16 @@ namespace MyApp.Infrastructure.Services.Menus
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUser;
+        private readonly IMapper _mapper;
 
-        public MenuService(IUnitOfWork unitOfWork, ICurrentUserService currentUser)
+        public MenuService(
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUser,
+            IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _currentUser = currentUser;
+            _mapper = mapper;
         }
 
         // ====================== Category Operations ======================
@@ -86,6 +93,42 @@ namespace MyApp.Infrastructure.Services.Menus
                 category.Name,
                 category.Order,
                 items);
+        }
+
+        // <<< متد جدید و ضروری برای داشبورد >>>
+        public async Task<IReadOnlyList<MenuCategoryDto>> GetAllCategoriesWithItemsAsync()
+        {
+            var restaurant = await _unitOfWork.Restaurants.GetMain();
+            await ValidateRestaurantAccessAsync(restaurant.Id, _currentUser.UserId.Value);
+
+            var categories = await _unitOfWork.MenuCategories.GetByRestaurantAsync(restaurant.Id);
+            // مرتب‌سازی بر اساس فیلد Order (برای Drag & Drop)
+            var orderedCategories = categories
+                .OrderBy(c => c.Order)
+                .ToList();
+
+            // مپینگ دستی — تمیز، سریع، بدون وابستگی به AutoMapper
+            var dtos = orderedCategories.Select(category => new MenuCategoryDto(
+                Id: category.Id,
+                Name: category.Name.Trim(),
+                Order: category.Order,
+                Items: category.Items
+                    .OrderBy(item => item.Name) // بعداً می‌تونی فیلد Order به MenuItem اضافه کنی
+                    .Select(item => new MenuItemDto(
+                        Id: item.Id,
+                        Name: item.Name.Trim(),
+                        Description: item.Description?.Trim() ?? string.Empty,
+                        Price: item.Price,
+                        ImageUrl: item.ImageUrl ?? string.Empty,
+                        IsAvailable: item.IsAvailable
+                    ))
+                    .ToList()
+                    .AsReadOnly()
+            ))
+            .ToList()
+            .AsReadOnly();
+
+            return dtos;
         }
 
         // ====================== Item Operations ======================
@@ -185,5 +228,7 @@ namespace MyApp.Infrastructure.Services.Menus
             return restaurants.FirstOrDefault()?.Id
                 ?? throw new InvalidOperationException("No restaurant found in the system.");
         }
+
+
     }
 }

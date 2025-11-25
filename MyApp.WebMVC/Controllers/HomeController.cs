@@ -25,7 +25,7 @@ namespace MyApp.WebMVC.Controllers
 
             var viewModel = dto is not null
                 ? _mapper.Map<HomeIndexViewModel>(dto)
-                : new HomeIndexViewModel { RestaurantName = "The Urban Bistro" };
+                : new HomeIndexViewModel { RestaurantName = "Pearl" };
 
             return View(viewModel);
         }
