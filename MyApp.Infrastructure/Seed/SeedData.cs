@@ -10,6 +10,18 @@ public static class SeedData
     public static async Task InitializeAsync(IUnitOfWork unitOfWork)
     {
         var users = await unitOfWork.Users.GetAllAsync();
+
+        //var usercats = await unitOfWork.MenuCategories.GetAllAsync();
+        //var items = await unitOfWork.MenuItems.GetAllAsync();
+
+        //foreach (var item in usercats)
+        //{
+        //    await unitOfWork.MenuCategories.DeleteAsync(item.Id);
+        //}
+        //foreach (var item in items)
+        //{
+        //    await unitOfWork.MenuItems.DeleteAsync(item.Id);
+        //}
         //var rests = await unitOfWork.Restaurants.GetAllAsync();
 
         //for (int i = 0; i < users.Count; i++)

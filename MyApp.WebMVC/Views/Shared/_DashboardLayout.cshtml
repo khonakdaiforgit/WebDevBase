@@ -82,20 +82,24 @@
                     <span>News & Events</span>
                 </a>
             </li>
-            <!-- Restaurant Profile -->
-            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Restaurant" && ViewContext.RouteData.Values["action"]?.ToString() == "Profile" ? "active" : "")">
-                <a class="nav-link" href="/Restaurant/Profile">
-                    <i class="fas fa-store"></i>
-                    <span>Restaurant Profile</span>
-                </a>
-            </li>
 
-            <!-- Working Hours -->
-            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Restaurant" && ViewContext.RouteData.Values["action"]?.ToString() == "WorkingHours" ? "active" : "")">
-                <a class="nav-link" href="/Restaurant/WorkingHours">
-                    <i class="fas fa-clock"></i>
-                    <span>Working Hours</span>
+            <!-- Restaurant (Dropdown Menu) -->
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Restaurant" ? "active" : "")">
+                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseRestaurant"
+                   aria-expanded="false" aria-controls="collapseRestaurant">
+                    <i class="fas fa-store"></i>
+                    <span>Restaurant</span>
                 </a>
+                <div id="collapseRestaurant" class="collapse @(ViewContext.RouteData.Values["controller"]?.ToString() == "Restaurant" ? "show" : "")"
+                     aria-labelledby="headingRestaurant" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Restaurant Settings:</h6>
+                        <a class="collapse-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Profile" ? "active" : "")"
+                           href="/Restaurant/Profile">Restaurant Profile</a>
+                        <a class="collapse-item @(ViewContext.RouteData.Values["action"]?.ToString() == "WorkingHours" ? "active" : "")"
+                           href="/Restaurant/WorkingHours">Working Hours</a>
+                    </div>
+                </div>
             </li>
 
             <!-- Logs -->
@@ -196,19 +200,6 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
-
-@*     <script>
-        setInterval(async () => {
-            try {
-                await fetch('/Account/KeepAlive', {
-                    credentials: 'include'
-                });
-                console.log('Session kept alive');
-            } catch (e) {
-                console.warn('KeepAlive failed');
-            }
-        }, 0.5 * 60 * 1000); // 8 دقیقه
-    </script> *@
 
 </body>
 </html>

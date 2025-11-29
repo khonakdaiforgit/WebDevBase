@@ -60,12 +60,13 @@ namespace MyApp.Infrastructure.Services.Menus
 
         public async Task DeleteCategoryAsync(Guid categoryId, Guid callerUserId)
         {
-            var category = await _unitOfWork.MenuCategories.GetWithItemsAsync(categoryId)
-                ?? throw new NotFoundException("Menu category not found.");
+            var category = await _unitOfWork.MenuCategories.GetByIdAsync(categoryId);
+            var items = await _unitOfWork.MenuItems.GetByCategoryIdAsync(categoryId);
+
 
             await ValidateRestaurantAccessAsync(category.RestaurantId, callerUserId);
 
-            if (category.Items.Any())
+            if (items.Any())
                 throw new BadRequestException("Cannot delete a category that contains menu items.");
 
             await _unitOfWork.MenuCategories.DeleteAsync(categoryId);
@@ -74,12 +75,14 @@ namespace MyApp.Infrastructure.Services.Menus
 
         public async Task<MenuCategoryDto?> GetCategoryAsync(Guid categoryId)
         {
-            var category = await _unitOfWork.MenuCategories.GetWithItemsAsync(categoryId);
+            var category = await _unitOfWork.MenuCategories.GetByIdAsync(categoryId);
+            var items = await _unitOfWork.MenuItems.GetByCategoryIdAsync(categoryId);
+
             if (category is null) return null;
 
             await ValidateRestaurantAccessAsync(category.RestaurantId, _currentUser.UserId.Value);
 
-            var items = category.Items.Select(i => new MenuItemDto(
+            var citems = items.Select(i => new MenuItemDto(
                 i.Id,
                 i.Name,
                 i.Description,
@@ -92,7 +95,8 @@ namespace MyApp.Infrastructure.Services.Menus
                 category.Id,
                 category.Name,
                 category.Order,
-                items);
+                citems
+                );
         }
 
         // <<< متد جدید و ضروری برای داشبورد >>>
@@ -102,6 +106,8 @@ namespace MyApp.Infrastructure.Services.Menus
             await ValidateRestaurantAccessAsync(restaurant.Id, _currentUser.UserId.Value);
 
             var categories = await _unitOfWork.MenuCategories.GetByRestaurantAsync(restaurant.Id);
+            var AllItems = await _unitOfWork.MenuItems.GetAllAsync();
+
             // مرتب‌سازی بر اساس فیلد Order (برای Drag & Drop)
             var orderedCategories = categories
                 .OrderBy(c => c.Order)
@@ -112,7 +118,8 @@ namespace MyApp.Infrastructure.Services.Menus
                 Id: category.Id,
                 Name: category.Name.Trim(),
                 Order: category.Order,
-                Items: category.Items
+                Items: AllItems
+                    .Where(c => c.CategoryId == category.Id)
                     .OrderBy(item => item.Name) // بعداً می‌تونی فیلد Order به MenuItem اضافه کنی
                     .Select(item => new MenuItemDto(
                         Id: item.Id,
@@ -133,15 +140,20 @@ namespace MyApp.Infrastructure.Services.Menus
 
         // ====================== Item Operations ======================
 
+        public async Task<MenuItemDto> GetItemAsync(Guid itemId, Guid callerUserId)
+        {
+            var item = await _unitOfWork.MenuItems.GetByIdAsync(itemId)
+                ?? throw new NotFoundException("Menu item not found.");
+
+            return new MenuItemDto(item.Id, item.Name, item.Description, item.Price, item.ImageUrl, item.IsAvailable);
+        }
+
         public async Task<Guid> CreateItemAsync(CreateMenuItemDto dto, Guid callerUserId)
         {
-            var category = await _unitOfWork.MenuCategories.GetByIdAsync(dto.CategoryId)
-                ?? throw new NotFoundException("Menu category not found.");
-
-            await ValidateRestaurantAccessAsync(category.RestaurantId, callerUserId);
 
             var item = new MenuItem
             {
+                CategoryId = dto.CategoryId,
                 Name = dto.Name.Trim(),
                 Description = dto.Description?.Trim() ?? string.Empty,
                 Price = dto.Price,
@@ -149,9 +161,12 @@ namespace MyApp.Infrastructure.Services.Menus
                 IsAvailable = dto.IsAvailable
             };
 
-            category.AddItem(item);
+            await _unitOfWork.MenuItems.AddAsync(item);
 
-            await _unitOfWork.MenuCategories.UpdateAsync(category);
+
+            //category.AddItem(item);
+
+            //await _unitOfWork.MenuCategories.UpdateAsync(category);
             await _unitOfWork.SaveChangesAsync();
 
             return item.Id;
@@ -162,10 +177,10 @@ namespace MyApp.Infrastructure.Services.Menus
             var item = await _unitOfWork.MenuItems.GetByIdAsync(dto.Id)
                 ?? throw new NotFoundException("Menu item not found.");
 
-            var category = await _unitOfWork.MenuCategories.GetByIdAsync(item.CategoryId)
-                ?? throw new NotFoundException("Parent category not found.");
+            //var category = await _unitOfWork.MenuCategories.GetByIdAsync(item.CategoryId)
+            //    ?? throw new NotFoundException("Parent category not found.");
 
-            await ValidateRestaurantAccessAsync(category.RestaurantId, callerUserId);
+            //await ValidateRestaurantAccessAsync(category.RestaurantId, callerUserId);
 
             if (dto.Name is not null) item.Name = dto.Name.Trim();
             if (dto.Description is not null) item.Description = dto.Description.Trim();
@@ -187,10 +202,8 @@ namespace MyApp.Infrastructure.Services.Menus
 
             await ValidateRestaurantAccessAsync(category.RestaurantId, callerUserId);
 
-            category.RemoveItem(itemId);
-            await _unitOfWork.MenuCategories.UpdateAsync(category);
+            await _unitOfWork.MenuItems.DeleteAsync(item.Id);
 
-            await _unitOfWork.MenuItems.DeleteAsync(itemId);
             await _unitOfWork.SaveChangesAsync();
         }
 

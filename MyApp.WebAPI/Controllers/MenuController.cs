@@ -14,7 +14,7 @@ namespace MyApp.WebAPI.Controllers
     public class MenuController : ControllerBase
     {
         private readonly IMenuService _menuService;
-        private readonly IRestaurantService  _restaurantService;
+        private readonly IRestaurantService _restaurantService;
 
         public MenuController(
             IMenuService menuService,
@@ -94,6 +94,16 @@ namespace MyApp.WebAPI.Controllers
         }
 
         // ====================== Item Endpoints ======================
+
+        [HttpGet("items/{itemId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> GetMenuItem(Guid itemId)
+        {
+
+            var dto = await _menuService.GetItemAsync(itemId, UserId);
+            return Ok(dto);
+        }
+
 
         /// <summary>
         /// ایجاد آیتم جدید در منو

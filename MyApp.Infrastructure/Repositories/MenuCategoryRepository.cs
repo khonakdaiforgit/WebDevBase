@@ -17,11 +17,4 @@ public class MenuCategoryRepository : GenericRepository<MenuCategory>, IMenuCate
             .SortBy(c => c.Order)
             .ToListAsync(ct);
     }
-
-    public async Task<MenuCategory?> GetWithItemsAsync(Guid categoryId, CancellationToken ct = default)
-    {
-        return await _collection
-            .Find(c => c.Id == categoryId)
-            .FirstOrDefaultAsync(ct);
-    }
 }

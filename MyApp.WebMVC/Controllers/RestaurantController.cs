@@ -27,7 +27,6 @@ public class RestaurantController : Controller
     public async Task<IActionResult> Profile()
     {
         var response = await Api().GetAsync("api/restaurant/profile");
-
         if (!response.IsSuccessStatusCode)
         {
             TempData["Error"] = "Could not load restaurant profile.";
@@ -36,7 +35,6 @@ public class RestaurantController : Controller
 
         var restaurant = await response.Content.ReadFromJsonAsync<RestaurantDto>();
         var model = _mapper.Map<RestaurantProfileViewModel>(restaurant);
-
         return View(model);
     }
 
@@ -57,7 +55,7 @@ public class RestaurantController : Controller
             Phone: model.Phone,
             Email: model.Email,
             LogoUrl: model.LogoUrl,
-            WorkingHours: new Dictionary<string, TimeRangeDto>() 
+            WorkingHours: new Dictionary<string, TimeRangeDto>()
         );
 
         var response = await Api().PutAsJsonAsync("api/restaurant", updateDto);
@@ -77,7 +75,7 @@ public class RestaurantController : Controller
         }
         else
         {
-            TempData["Error"] = "An error occurred while updating the profile.";
+            TempData["Error"] = "An error occurred while updating the restaurant profile.";
         }
 
         return View(model);
@@ -87,7 +85,6 @@ public class RestaurantController : Controller
     public async Task<IActionResult> WorkingHours()
     {
         var response = await Api().GetAsync("api/restaurant/profile");
-
         if (!response.IsSuccessStatusCode)
         {
             TempData["Error"] = "Could not load working hours.";
@@ -98,7 +95,6 @@ public class RestaurantController : Controller
         var model = new WorkingHoursViewModel
         {
             RestaurantId = restaurant.Id,
-            // تبدیل از Dictionary<string, TimeRangeDto> به پراپرتی‌های ViewModel
             SundayOpen = GetTimeOrDefault(restaurant.WorkingHours, "Sunday", true),
             SundayClose = GetTimeOrDefault(restaurant.WorkingHours, "Sunday", false),
             MondayOpen = GetTimeOrDefault(restaurant.WorkingHours, "Monday", true),
@@ -123,35 +119,55 @@ public class RestaurantController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> WorkingHours(WorkingHoursViewModel model)
     {
-        if (!ModelState.IsValid)
-            return View(model);
+        var closedDays = new HashSet<string>();
+        if (model.SundayClosed) closedDays.Add("Sunday");
+        if (model.MondayClosed) closedDays.Add("Monday");
+        if (model.TuesdayClosed) closedDays.Add("Tuesday");
+        if (model.WednesdayClosed) closedDays.Add("Wednesday");
+        if (model.ThursdayClosed) closedDays.Add("Thursday");
+        if (model.FridayClosed) closedDays.Add("Friday");
+        if (model.SaturdayClosed) closedDays.Add("Saturday");
 
-        var dict = new Dictionary<string, (TimeSpan Open, TimeSpan Close)>
+        var dict = new Dictionary<string, DayHoursDto>();
+
+        TryAdd("Sunday");
+        TryAdd("Monday");
+        TryAdd("Tuesday");
+        TryAdd("Wednesday");
+        TryAdd("Thursday");
+        TryAdd("Friday");
+        TryAdd("Saturday");
+
+        void TryAdd(string day)
         {
-            ["Sunday"] = (model.SundayOpen, model.SundayClose),
-            ["Monday"] = (model.MondayOpen, model.MondayClose),
-            ["Tuesday"] = (model.TuesdayOpen, model.TuesdayClose),
-            ["Wednesday"] = (model.WednesdayOpen, model.WednesdayClose),
-            ["Thursday"] = (model.ThursdayOpen, model.ThursdayClose),
-            ["Friday"] = (model.FridayOpen, model.FridayClose),
-            ["Saturday"] = (model.SaturdayOpen, model.SaturdayClose)
-        };
+            var openProp = typeof(WorkingHoursViewModel).GetProperty($"{day}Open")!.GetValue(model) as TimeSpan?;
+            var closeProp = typeof(WorkingHoursViewModel).GetProperty($"{day}Close")!.GetValue(model) as TimeSpan?;
+
+            // Only add if the day is NOT closed and has valid times
+            if (!closedDays.Contains(day) && openProp.HasValue && closeProp.HasValue && openProp.Value != TimeSpan.Zero)
+            {
+                dict[day] = new DayHoursDto(openProp.Value, closeProp.Value);
+            }
+            else
+            {
+                dict[day] = new DayHoursDto(TimeSpan.Zero, TimeSpan.Zero);
+            }
+        }
 
         var dto = new UpdateWorkingHoursDto(model.RestaurantId, dict);
-
         var response = await Api().PatchAsJsonAsync("api/restaurant/working-hours", dto);
 
         if (response.IsSuccessStatusCode)
         {
             TempData["Success"] = "Working hours updated successfully!";
-            return RedirectToAction("WorkingHours");
+            return RedirectToAction(nameof(WorkingHours));
         }
 
-        TempData["Error"] = "Failed to update working hours.";
+        TempData["Error"] = "Failed to update working hours. Please try again.";
         return View(model);
     }
 
-    // آپلود لوگو (اختیاری — اگر می‌خوای مستقیم از داشبورد آپلود کنی)
+    // Optional: Logo upload via dashboard
     [HttpPost]
     public async Task<IActionResult> UploadLogo(IFormFile file)
     {
@@ -162,7 +178,7 @@ public class RestaurantController : Controller
         using var stream = file.OpenReadStream();
         content.Add(new StreamContent(stream), "file", file.FileName);
 
-        var response = await Api().PostAsync("api/upload/logo", content); // باید این اندپوینت رو بعداً بسازی
+        var response = await Api().PostAsync("api/upload/logo", content);
 
         if (response.IsSuccessStatusCode)
         {
@@ -171,15 +187,15 @@ public class RestaurantController : Controller
             return Json(new { success = true, url });
         }
 
-        return Json(new { success = false, message = "Upload failed." });
+        return Json(new { success = false, message = "Upload failed. Please try again." });
     }
 
-    // متد کمکی برای خواندن ساعت‌ها
-    private TimeSpan GetTimeOrDefault(Dictionary<string, TimeRangeDto> hours, string day, bool isOpen)
+    // Helper method to get opening/closing time with fallback
+    private static TimeSpan GetTimeOrDefault(Dictionary<string, TimeRangeDto> hours, string day, bool isOpen)
     {
         if (hours.TryGetValue(day, out var range))
             return isOpen ? range.Open : range.Close;
 
-        return isOpen ? new TimeSpan(9, 0, 0) : new TimeSpan(22, 0, 0);
+        return isOpen ? new TimeSpan(9, 0, 0) : new TimeSpan(22, 0, 0); // default 09:00 - 22:00
     }
 }

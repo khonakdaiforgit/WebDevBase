@@ -1,0 +1,157 @@
+﻿@model MyApp.WebMVC.Views.Menu.ViewModels.UpdateMenuItemViewModel
+@{
+    ViewData["Title"] = "Edit Menu Item";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-white border-bottom mb-4">
+            <li class="breadcrumb-item"><a href="/Dashboard">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/Menu">Menu Management</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit Item</li>
+        </ol>
+    </nav>
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-pencil-alt text-warning"></i> Edit Menu Item
+        </h1>
+        <a asp-action="Index" class="btn btn-secondary shadow-sm">
+            <i class="fas fa-arrow-left me-1"></i> Back to Menu
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm">
+            <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+            <i class="fas fa-exclamation-triangle me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4 border-left-warning">
+                <div class="card-header py-3 bg-gradient-warning text-white">
+                    <h6 class="m-0 font-weight-bold"><i class="fas fa-edit me-2"></i> Update Item Details</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="EditItem" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label asp-for="Name" class="form-label fw-bold text-gray-700">Item Name</label>
+                                <input asp-for="Name" class="form-control form-control-lg shadow-sm" required />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Price" class="form-label fw-bold text-gray-700">Price ($)</label>
+                                <div class="input-group shadow-sm">
+                                    <span class="input-group-text bg-warning text-white fw-bold">$</span>
+                                    <input asp-for="Price" type="number" step="0.01" class="form-control" min="0.01" max="10000" required />
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                                <small class="form-text text-muted">Tip: Adjust for promotions or cost changes.</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-bold text-gray-700">Description</label>
+                            <textarea asp-for="Description" class="form-control shadow-sm" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-gray-700">Current Image</label>
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <div class="text-center mb-3">
+                                    <img src="@Model.ImageUrl" alt="Current Image" class="img-fluid rounded shadow-sm" style="max-height: 300px;" />
+                                </div>
+                            }
+                            <label asp-for="ImageFile" class="form-label fw-bold text-gray-700">Upload New Image (Optional)</label>
+                            <input asp-for="ImageFile" type="file" accept="image/*" class="form-control shadow-sm" id="ImageFile" />
+                        </div>
+
+                        <!-- پیش‌نمایش تصویر جدید -->
+                        <div id="imagePreview" class="mb-3 text-center" style="display: none;">
+                            <img id="previewImg" src="" alt="New Image Preview" class="img-fluid rounded shadow-sm" style="max-height: 300px;" />
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="IsAvailable" type="checkbox" class="form-check-input" />
+                            <label asp-for="IsAvailable" class="form-check-label text-gray-700">Available Now</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning btn-lg shadow-sm"><i class="fas fa-save me-2"></i> Update Item</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4 border-left-secondary">
+                <div class="card-header py-3 bg-gradient-secondary text-white">
+                    <h6 class="m-0 font-weight-bold"><i class="fas fa-lightbulb me-2"></i> Optimization Tips</h6>
+                </div>
+                <div class="card-body text-gray-800">
+                    <ul class="fa-ul">
+                        <li><span class="fa-li"><i class="fas fa-dollar-sign text-secondary"></i></span> Use .99 pricing to increase perceived value.</li>
+                        <li><span class="fa-li"><i class="fas fa-fire text-secondary"></i></span> Mark best-sellers as available to drive revenue.</li>
+                        <li><span class="fa-li"><i class="fas fa-image text-secondary"></i></span> Refresh photos seasonally for US holidays like Thanksgiving.</li>
+                        <li><span class="fa-li"><i class="fas fa-chart-pie text-secondary"></i></span> Analyze sales data before major updates.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // پیش‌نمایش تصویر جدید
+        document.getElementById('ImageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            const img = document.getElementById('previewImg');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+                img.src = '';
+            }
+        });
+
+        // اعتبارسنجی Bootstrap
+        (() => {
+            'use strict';
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    </script>
+}

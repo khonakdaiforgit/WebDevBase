@@ -18,7 +18,7 @@ namespace MyApp.Domain.ValueObjects
                 if (!IsValidDayName(dayName))
                     throw new DomainException($"Invalid day name: {dayName}");
 
-                if (open >= close)
+                if (open >= close && TimeSpan.Zero != open && TimeSpan.Zero != close)
                     throw new DomainException($"Close time must be after open time on {dayName}");
 
                 workingHours.DailyHours[dayName] = new TimeRange(open, close);

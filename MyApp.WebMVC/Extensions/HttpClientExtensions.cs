@@ -8,7 +8,7 @@ public static class HttpClientExtensions
     /// <summary>
     /// خودکار Bearer Token رو از HttpContext (Items یا Cookie) می‌گیره و ست می‌کنه
     /// </summary>
-    public static HttpClient WithJwt(this HttpClient client, HttpContext context)
+    private static HttpClient WithJwt(this HttpClient client, HttpContext context)
     {
         var token = context.Items["__LatestAccessToken"] as string
                     ?? context.Request.Cookies["access_token"];

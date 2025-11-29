@@ -48,7 +48,6 @@
                                 <th style="width: 18%">Day</th>
                                 <th style="width: 24%">Opening Time</th>
                                 <th style="width: 24%">Closing Time</th>
-                                <th style="width: 18%">Status</th>
                                 <th style="width: 16%">Closed?</th>
                             </tr>
                         </thead>
@@ -76,23 +75,18 @@
                                         <td>
                                             <input type="time"
                                                    name="@openName"
-                                                   value="@(open == TimeSpan.Zero ? "" : open.ToString(@"hh\:mm"))"
-                                                   class="form-control @(isClosed ? "text-muted" : "")"
-                                                   @(isClosed ? "disabled" : "")
-                                                   required=!isClosed />
+                                                   value="@(open == TimeSpan.Zero ? "" : open.Value.ToString(@"hh\:mm"))"
+                                                   class="form-control @(isClosed ? "text-muted bg-light" : "")"
+                                                   readonly="@isClosed"
+                                                   required="!@isClosed" />
                                         </td>
                                         <td>
                                             <input type="time"
                                                    name="@closeName"
-                                                   value="@(close == TimeSpan.Zero ? "" : close.ToString(@"hh\:mm"))"
-                                                   class="form-control @(isClosed ? "text-muted" : "")"
-                                                   @(isClosed ? "disabled" : "")
-                                                   required=!isClosed />
-                                        </td>
-                                        <td>
-                                            <span class="badge @(isClosed ? "bg-danger" : "bg-success") fs-6">
-                                                @(isClosed ? "Closed" : "Open")
-                                            </span>
+                                                   value="@(close == TimeSpan.Zero ? "" : close.Value.ToString(@"hh\:mm"))"
+                                                   class="form-control @(isClosed ? "text-muted bg-light" : "")"
+                                                   readonly="@isClosed"
+                                                   required="!@isClosed" />
                                         </td>
                                         <td class="text-center">
                                             <div class="form-check form-switch">
@@ -101,6 +95,8 @@
                                                        role="switch"
                                                        @(isClosed ? "checked" : "")
                                                        onchange="toggleClosedDay(this, '@day')">
+                                                <!-- این hidden مهم‌ترین بخشه! -->
+                                                <input type="hidden" name="@(day)Closed" value="@(isClosed ? "true" : "false")" />
                                             </div>
                                         </td>
                                     </tr>
@@ -131,29 +127,42 @@
         function toggleClosedDay(checkbox, day) {
             const openInput = document.querySelector(`input[name="${day}Open"]`);
             const closeInput = document.querySelector(`input[name="${day}Close"]`);
+            const hiddenClosed = document.querySelector(`input[name="${day}Closed"]`);
             const badge = checkbox.closest('tr').querySelector('.badge');
 
             if (checkbox.checked) {
-                openInput.disabled = true;
-                closeInput.disabled = true;
+                // فقط readonly می‌کنیم — نه disabled!
+                openInput.readOnly = true;
+                closeInput.readOnly = true;
                 openInput.value = "";
                 closeInput.value = "";
-                badge.textContent = "Closed";
-                badge.className = "badge bg-danger fs-6";
+                hiddenClosed.value = "true";
+
+                //badge.textContent = "Closed";
+                //badge.className = "badge bg-danger fs-6";
+
+                openInput.classList.add("text-muted", "bg-light");
+                closeInput.classList.add("text-muted", "bg-light");
+
                 openInput.removeAttribute('required');
                 closeInput.removeAttribute('required');
             } else {
-                openInput.disabled = false;
-                closeInput.disabled = false;
+                openInput.readOnly = false;
+                closeInput.readOnly = false;
                 openInput.value = openInput.value || "09:00";
                 closeInput.value = closeInput.value || "22:00";
-                badge.textContent = "Open";
-                badge.className = "badge bg-success fs-6";
+                hiddenClosed.value = "false";
+
+                //badge.textContent = "Open";
+                //badge.className = "badge bg-success fs-6";
+
+                openInput.classList.remove("text-muted", "bg-light");
+                closeInput.classList.remove("text-muted", "bg-light");
+
                 openInput.setAttribute('required', '');
                 closeInput.setAttribute('required', '');
             }
         }
-
         // اعتبارسنجی فرم قبل از ارسال
         (() => {
             'use strict'

@@ -1,38 +1,35 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Data;
 using MyApp.Infrastructure.Repositories.Common;
 using MyApp.Infrastructure.Repositories.Interface;
 
-namespace MyApp.Infrastructure.Repositories;
-
-public class MenuItemRepository : GenericRepository<MenuItem>, IMenuItemRepository
+namespace MyApp.Infrastructure.Repositories
 {
-    private readonly IMongoCollection<MenuCategory> _categoryCollection;
-    public MenuItemRepository(MongoDbContext context) : base(context)
+    public class MenuItemRepository : GenericRepository<MenuItem>, IMenuItemRepository
     {
-        _categoryCollection = context.GetCollection<MenuCategory>();
-    }
-    public async Task<IReadOnlyList<MenuItem>> GetByCategoryAsync(Guid categoryId, CancellationToken ct = default)
-    {
-        var category = await _categoryCollection
-                .Find(c => c.Id == categoryId)
-                .FirstOrDefaultAsync(ct);
+        public MenuItemRepository(MongoDbContext context) : base(context) { }
 
-        return category?.Items ?? new List<MenuItem>();
-    }
+        public async Task<IReadOnlyList<MenuItem>> GetByCategoryIdAsync(Guid categoryId, CancellationToken ct = default)
+        {
+            return await _collection
+                        .Find(item => item.CategoryId == categoryId && item.IsAvailable)
+                        .SortBy(item => item.Name)
+                        .ToListAsync(ct);
+        }
 
-    // اختیاری: آپدیت مستقیم آیتم بدون لود کل دسته
-    public async Task UpdateItemInCategoryAsync(Guid categoryId, MenuItem updatedItem, CancellationToken ct = default)
-    {
-        var filter = Builders<MenuCategory>.Filter.And(
-            Builders<MenuCategory>.Filter.Eq(c => c.Id, categoryId),
-            Builders<MenuCategory>.Filter.ElemMatch(c => c.Items, i => i.Id == updatedItem.Id)
-        );
+        public async Task ToggleAvailabilityAsync(Guid itemId, CancellationToken ct = default)
+        {
+            var filter = Builders<MenuItem>.Filter.Eq(x => x.Id, itemId);
 
-        var update = Builders<MenuCategory>.Update
-            .Set(c => c.Items[-1], updatedItem); // -1 یعنی آخرین المنت (MongoDB Array Update)
+            var update = Builders<MenuItem>.Update
+                .BitwiseXor(x => x.IsAvailable, true);
 
-        await _categoryCollection.UpdateOneAsync(filter, update, cancellationToken: ct);
+            var result = await _collection.UpdateOneAsync(filter, update, cancellationToken: ct);
+
+            if (result.MatchedCount == 0)
+                throw new KeyNotFoundException($"Menu item with ID {itemId} was not found.");
+        }
     }
 }

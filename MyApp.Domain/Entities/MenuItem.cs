@@ -11,7 +11,6 @@ namespace MyApp.Domain.Entities
         public string ImageUrl { get;  set; }
         public bool IsAvailable { get;  set; } = true;
         public Guid CategoryId { get; set; }
-
         public void ToggleAvailability() => IsAvailable = !IsAvailable;
     }
 }

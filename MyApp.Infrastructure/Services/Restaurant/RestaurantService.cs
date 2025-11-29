@@ -97,12 +97,13 @@ namespace MyApp.Infrastructure.Services.Restaurant
         {
             var restaurant = await GetRestaurantOrThrowAsync(dto.RestaurantId, callerUserId);
 
-            restaurant.WorkingHours = WorkingHours.Create(
-                dto.WorkingHours.ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => (kvp.Value.Open, kvp.Value.Close)
-                )
-            );
+            var domainHours = dto.WorkingHours?.ToDictionary(
+               kvp => kvp.Key,
+               kvp => (Open: kvp.Value.Open, Close: kvp.Value.Close)
+            ) ?? new Dictionary<string, (TimeSpan Open, TimeSpan Close)>();
+
+            var newWorkingHours = WorkingHours.Create(domainHours);
+            restaurant.WorkingHours = newWorkingHours;
 
             await _unitOfWork.Restaurants.UpdateAsync(restaurant);
             await _unitOfWork.SaveChangesAsync();

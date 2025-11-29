@@ -12,6 +12,7 @@ namespace MyApp.Application.Abstractions.Menus
         Task<IReadOnlyList<MenuCategoryDto>> GetAllCategoriesWithItemsAsync();
 
         // آیتم
+        Task<MenuItemDto> GetItemAsync(Guid itemId, Guid callerUserId);
         Task<Guid> CreateItemAsync(CreateMenuItemDto dto, Guid callerUserId);
         Task UpdateItemAsync(UpdateMenuItemDto dto, Guid callerUserId);
         Task DeleteItemAsync(Guid itemId, Guid callerUserId);
