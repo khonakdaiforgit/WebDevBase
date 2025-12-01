@@ -5,34 +5,24 @@
 }
 
 <div class="container-fluid">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb bg-white border-bottom mb-4">
-            <li class="breadcrumb-item"><a href="/Dashboard">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Menu Management</li>
-        </ol>
-    </nav>
-
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">
-            <i class="fas fa-list-alt text-primary"></i> Menu Management
-        </h1>
-        <a asp-action="CreateCategory" class="btn btn-primary shadow-sm">
-            <i class="fas fa-plus me-1"></i> Add New Category
+        <h1 class="h3 mb-0 text-gray-800">Menu Management</h1>
+        <a asp-action="CreateCategory" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Category
         </a>
     </div>
 
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show shadow-sm">
-            <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
-
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm">
-            <i class="fas fa-exclamation-triangle me-2"></i> @TempData["Error"]
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
@@ -40,92 +30,216 @@
     <div id="categories-list" class="sortable">
         @foreach (var category in Model.OrderBy(c => c.Order))
         {
-            <div class="card shadow mb-4 border-left-primary" data-id="@category.Id">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center bg-gradient-light">
-                    <h5 class="m-0 font-weight-bold text-primary">@category.Name <small class="text-muted">(Order: @category.Order)</small></h5>
-                    <div>
-                        <a asp-action="EditCategory" asp-route-id="@category.Id" class="btn btn-sm btn-warning shadow-sm"><i class="fas fa-edit"></i> Edit</a>
-                        <form asp-action="DeleteCategory" asp-route-id="@category.Id" method="post" class="d-inline">
+            <div class="card shadow mb-4" data-id="@category.Id">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center ">
+                    <div class="me-3">
+                        <form asp-action="MoveCategoryOrder"
+                              asp-route-categoryId="@category.Id"
+                              asp-route-isUp="true"
+                              method="post"
+                              class="d-inline">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-danger shadow-sm"
-                                    onclick="return confirm('Are you sure you want to delete \" @category.Name\"? This will remove all items inside and cannot be undone.');">
-                                <i class="fas fa-trash"></i> Delete
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-primary @(category.Order == Model.Min(c => c.Order) ? "disabled" : "")"
+                                    title="Move Up">
+                                <i class="fas fa-arrow-up"></i>
                             </button>
                         </form>
-                        <a asp-action="CreateItem" asp-route-categoryId="@category.Id" class="btn btn-sm btn-success shadow-sm"><i class="fas fa-plus"></i> Add Item</a>
+
+                        <form asp-action="MoveCategoryOrder"
+                              asp-route-categoryId="@category.Id"
+                              asp-route-isUp="false"
+                              method="post"
+                              class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-primary @(category.Order == Model.Max(c => c.Order) ? "disabled" : "")"
+                                    title="Move Down">
+                                <i class="fas fa-arrow-down"></i>
+                            </button>
+                        </form>
+                    </div>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        @category.Name <small class="text-muted">(Order: @category.Order)</small>
+                    </h6>
+                    <div>
+                        <a asp-action="EditCategory" asp-route-id="@category.Id" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form asp-action="DeleteCategory" asp-route-id="@category.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-secondary" onclick="return confirm('Delete this category and all items?');">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                        <a asp-action="CreateItem" asp-route-categoryId="@category.Id" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-plus"></i> Add Item
+                        </a>
                     </div>
                 </div>
-                <div class="card-body">
-                    <ul class="list-group sortable-items flush" data-category-id="@category.Id">
+
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush sortable-items" data-category-id="@category.Id">
                         @foreach (var item in category.Items)
                         {
-                            <li class="list-group-item d-flex justify-content-between align-items-center" data-id="@item.Id">
-                                <div class="d-flex align-items-center">
-                                    <img src="@item.ImageUrl" alt="@item.Name" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;" />
-                                    <div>
-                                        <strong>@item.Name</strong> - <span class="text-success">$@item.Price.ToString("N2")</span><br />
-                                        <small class="text-muted">@item.Description</small>
+
+                            // مرتب‌سازی آیتم‌ها بر اساس Order برای تشخیص اول/آخر
+                            var orderedItems = category.Items.OrderBy(i => i.Order).ToList();
+                            var currentIndex = orderedItems.FindIndex(i => i.Id == item.Id);
+                            var isFirstItem = currentIndex == 0;
+                            var isLastItem = currentIndex == orderedItems.Count - 1;
+
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center" data-id="@item.Id" style="background-color:@(item.IsAvailable ? "white" : "#ececec")">
+                                <div class="d-flex align-items-center flex-grow-1">
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.Name" class="me-3 rounded" style="width:50px;height:50px;object-fit:cover;" />
+                                    }
+
+                                    <div class="flex-grow-1">
+                                        <strong>@item.Name</strong><br />
+                                        <small class="text-success">$@item.Price.ToString("N2")</small>
+                                        @if (!string.IsNullOrEmpty(item.Description))
+                                        {
+                                            <span class="text-muted"> – @item.Description</span>
+                                        }
                                     </div>
                                 </div>
+
+                                <!-- دکمه‌های بالا و پایین برای آیتم -->
+                                <div class="me-3">
+                                    <form asp-action="MoveItemOrder"
+                                          asp-route-categoryId="@category.Id"
+                                          asp-route-itemId="@item.Id"
+                                          asp-route-isUp="true"
+                                          method="post"
+                                          class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-secondary @(isFirstItem ? "disabled" : "")"
+                                                title="Move Up">
+                                            <i class="fas fa-arrow-up"></i>
+                                        </button>
+                                    </form>
+
+                                    <form asp-action="MoveItemOrder"
+                                          asp-route-categoryId="@category.Id"
+                                          asp-route-itemId="@item.Id"
+                                          asp-route-isUp="false"
+                                          method="post"
+                                          class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-secondary @(isLastItem ? "disabled" : "")"
+                                                title="Move Down">
+                                            <i class="fas fa-arrow-down"></i>
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <!-- دکمه‌های موجود (تغییر وضعیت، ویرایش، حذف) -->
                                 <div>
                                     <form asp-action="ToggleAvailability" asp-route-id="@item.Id" method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sm @(item.IsAvailable ? "btn-success" : "btn-secondary") shadow-sm">
-                                            <i class="fas fa-toggle-@(item.IsAvailable ? "on" : "off")"></i> @(item.IsAvailable ? "Available" : "Unavailable")
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-toggle-@(item.IsAvailable ? "on" : "off")"></i>
                                         </button>
                                     </form>
-                                    <a asp-action="EditItem" asp-route-id="@item.Id" class="btn btn-sm btn-warning shadow-sm"><i class="fas fa-edit"></i> Edit</a>
+
+                                    <a asp-action="EditItem" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+
                                     <form asp-action="DeleteItem" asp-route-id="@item.Id" method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sm btn-danger shadow-sm"
-                                                onclick="return confirm('Are you sure you want to permanently delete \" @item.Name\"? This action cannot be undone.');">
-                                            <i class="fas fa-trash"></i> Delete
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary"
+                                                onclick="return confirm('Delete this item permanently?');">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
                                 </div>
                             </li>
                         }
+
+                        @if (!category.Items.Any())
+                        {
+                            <li class="list-group-item text-center text-muted py-4">
+                                <i class="fas fa-utensils fa-2x mb-3 text-light"></i><br />
+                                No items yet. Click "Add Item" to get started.
+                            </li>
+                        }
                     </ul>
-                    @if (!category.Items.Any())
-                    {
-                        <div class="text-center text-muted mt-3">
-                            <i class="fas fa-info-circle me-2"></i> No items yet. Add one to get started!
-                        </div>
-                    }
                 </div>
             </div>
         }
     </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-clipboard-list fa-5x text-light mb-4"></i>
+            <h4>No categories yet</h4>
+            <p class="text-muted">Start by creating your first menu category</p>
+            <a asp-action="CreateCategory" class="btn btn-primary btn-lg">Create First Category</a>
+        </div>
+    }
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script>
-        // Drag & Drop برای دسته‌ها
+
+        // دکمه‌های بالا و پایین
+        document.querySelectorAll('.move-up, .move-down').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                if (this.classList.contains('disabled')) return;
+
+                const categoryId = this.dataset.id;
+                const isUp = this.classList.contains('move-up');
+
+                try {
+                    const response = await fetch(`/api/menu/categories/${categoryId}/order`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify(isUp)
+                    });
+
+                    if (response.ok) {
+                        location.reload(); // ساده‌ترین راه: رفرش صفحه
+                        // یا اگر نمی‌خوای رفرش کنی، بعداً می‌تونیم با AJAX لیست رو دوباره بسازیم
+                    } else {
+                        alert('خطا در جابجایی ترتیب');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('خطا در ارتباط با سرور');
+                }
+            });
+        });
+
         new Sortable(document.getElementById('categories-list'), {
             handle: '.card-header',
             animation: 150,
-            onEnd: async function (evt) {
-                const orderedIds = Array.from(document.querySelectorAll('#categories-list .card')).map(card => card.dataset.id);
-                await fetch('/Menu/ReorderCategories', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(orderedIds)
-                });
+            onEnd: async evt => {
+                const ids = Array.from(document.querySelectorAll('#categories-list .card')).map(c => c.dataset.id);
+                await fetch('/Menu/ReorderCategories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ids) });
             }
         });
 
-        // Drag & Drop برای آیتم‌ها در هر دسته
         document.querySelectorAll('.sortable-items').forEach(list => {
             new Sortable(list, {
                 animation: 150,
-                onEnd: async function (evt) {
+                onEnd: async evt => {
                     const categoryId = list.dataset.categoryId;
-                    const orderedIds = Array.from(list.querySelectorAll('li')).map(li => li.dataset.id);
+                    const ids = Array.from(list.querySelectorAll('li')).map(li => li.dataset.id);
                     await fetch(`/Menu/ReorderItems?categoryId=${categoryId}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(orderedIds)
+                        body: JSON.stringify(ids)
                     });
                 }
             });

@@ -23,13 +23,13 @@ namespace MyApp.Infrastructure.Services.Authorization
             return IsOwnerAsync(userId); // فقط مالک
         }
 
-        public async Task<bool> CanAccessRestaurantAsync(Guid userId, Guid restaurantId, AccessLevel required = AccessLevel.StoreAdmin)
+        public async Task<bool> CanAccessRestaurantAsync(Guid userId, AccessLevel required = AccessLevel.StoreAdmin)
         {
             if (required == AccessLevel.Owner)
                 return await IsOwnerAsync(userId);
 
             // StoreAdmin: مالک رستوران یا Owner پروژه
-            var isRestaurantOwner = await _unitOfWork.Restaurants.IsOwnerAsync(restaurantId, userId);
+            var isRestaurantOwner = await _unitOfWork.Restaurants.IsOwnerAsync(userId);
             var isProjectOwner = await IsOwnerAsync(userId);
 
             return isRestaurantOwner || isProjectOwner;

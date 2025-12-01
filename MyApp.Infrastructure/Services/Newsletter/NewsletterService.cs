@@ -46,20 +46,6 @@ namespace MyApp.Infrastructure.Services.Newsletter
             );
         }
 
-        // Helper Methods
-        private async Task<bool> IsOwnerOfRestaurantAsync(Guid userId, Guid restaurantId)
-        {
-            // فرض: هر یوزر فقط یک رستوران داره، یا از جدول RestaurantUser چک کن
-            var restaurant = await _unitOfWork.Restaurants.GetByIdAsync(restaurantId);
-            // اگر بعداً چند رستوران داشتی، از جدول ارتباطی استفاده کن
-            return true; // موقتاً اجازه می‌ده، بعداً منطق دقیق‌تر بذار
-        }
-
-        private async Task<bool> IsOwnerOfNewsletterAsync(Guid userId, Domain.Entities.Newsletter newsletter)
-        {
-            return await IsOwnerOfRestaurantAsync(userId, newsletter.RestaurantId); // یا از SentByUserId چک کن
-        }
-
         private async Task LogActionAsync(string message, Guid userId, Guid newsletterId, string level = "Info", int statusCode = 200)
         {
             await _logService.LogAsync(new LogEntryDto(
@@ -78,15 +64,8 @@ namespace MyApp.Infrastructure.Services.Newsletter
             ));
         }
 
-        public async Task<Guid> CreateAsync(string subject, string content, Guid RestaurantId)
+        public async Task<Guid> CreateAsync(string subject, string content)
         {
-            var restaurant = await _unitOfWork.Restaurants.GetByIdAsync(RestaurantId, CancellationToken.None);
-            if (restaurant == null)
-                throw new NotFoundException("Restaurant not found.");
-
-            // فقط صاحب رستوران می‌تونه خبرنامه بسازه (می‌تونی بعداً نقش Editor هم اضافه کنی)
-            if (!await IsOwnerOfRestaurantAsync(_currentUser.UserId.Value, RestaurantId))
-                throw new ForbiddenException("You don't have permission to create newsletter for this restaurant.");
 
             var newsletter = new Domain.Entities.Newsletter
             {
@@ -108,13 +87,10 @@ namespace MyApp.Infrastructure.Services.Newsletter
             if (newsletter == null)
                 throw new NotFoundException("Newsletter not found.");
 
-            if (!await IsOwnerOfNewsletterAsync(_currentUser.UserId.Value, newsletter))
-                throw new ForbiddenException("Access denied.");
-
             if (newsletter.Status == NewsletterStatus.Sent)
                 throw new BadRequestException("Newsletter already sent.");
 
-            var subscribers = await _unitOfWork.EmailSubscribers.GetActiveByRestaurantAsync(newsletter.RestaurantId);
+            var subscribers = await _unitOfWork.EmailSubscribers.GetActiveByRestaurantAsync();
 
 
             var tasks = subscribers.Select(email =>

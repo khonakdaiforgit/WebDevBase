@@ -22,7 +22,7 @@ namespace MyApp.Infrastructure.Services.Contacts
         /// <summary>
         /// Submit a new contact message from the public website
         /// </summary>
-        public async Task<Guid> SubmitAsync(string name, string email, string message, Guid? restaurantId = null)
+        public async Task<Guid> SubmitAsync(string name, string email, string message)
         {
             name = name.Trim();
             email = email.Trim().ToLowerInvariant();
@@ -32,18 +32,12 @@ namespace MyApp.Infrastructure.Services.Contacts
             if (string.IsNullOrWhiteSpace(email)) throw new BadRequestException("Email is required.");
             if (string.IsNullOrWhiteSpace(message)) throw new BadRequestException("Message is required.");
 
-            // In single-restaurant mode: use the only existing restaurant if not provided
-            if (!restaurantId.HasValue)
-            {
-                restaurantId = await GetSystemRestaurantIdAsync();
-            }
 
             var contactMessage = new ContactMessage
             {
                 Name = name,
                 Email = email,
                 Message = message,
-                RestaurantId = restaurantId.Value,
                 SentAt = DateTime.UtcNow,
                 IsRead = false
             };
@@ -59,12 +53,11 @@ namespace MyApp.Infrastructure.Services.Contacts
         /// <summary>
         /// Mark a contact message as read (admin panel)
         /// </summary>
-        public async Task MarkAsReadAsync(Guid messageId, Guid callerUserId)
+        public async Task MarkAsReadAsync(Guid messageId)
         {
             var message = await _unitOfWork.ContactMessages.GetByIdAsync(messageId)
                 ?? throw new NotFoundException("Contact message not found.");
 
-            await ValidateRestaurantAccessAsync(message.RestaurantId, callerUserId);
 
             if (message.IsRead)
                 return; // already read
@@ -79,22 +72,13 @@ namespace MyApp.Infrastructure.Services.Contacts
         /// Get paginated list of contact messages for the admin panel
         /// </summary>
         public async Task<PagedResult<ContactMessageDto>> GetListAsync(
-            Guid? restaurantId = null,
             bool? onlyUnread = null,
             int page = 1,
             int pageSize = 20)
         {
-            if (!restaurantId.HasValue)
-            {
-                restaurantId = await GetCurrentUserRestaurantIdAsync();
-            }
-            else
-            {
-                await ValidateRestaurantAccessAsync(restaurantId.Value, _currentUser.UserId.Value);
-            }
+
 
             var pagedResult = await _unitOfWork.ContactMessages.GetPagedAsync(
-                restaurantId: restaurantId.Value,
                 onlyUnread: onlyUnread,
                 page: page,
                 pageSize: pageSize);

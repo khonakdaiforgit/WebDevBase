@@ -13,10 +13,17 @@ public static class SeedData
 
         //var usercats = await unitOfWork.MenuCategories.GetAllAsync();
         //var items = await unitOfWork.MenuItems.GetAllAsync();
+        //var ccc = items.GroupBy(c => c.CategoryId);
 
-        //foreach (var item in usercats)
+        //foreach (var item in ccc)
         //{
-        //    await unitOfWork.MenuCategories.DeleteAsync(item.Id);
+        //    int index = 0;
+        //    foreach (var item2 in item)
+        //    {
+        //        item2.Order = index++;
+        //        await unitOfWork.MenuItems.UpdateAsync(item2);
+        //    }
+
         //}
         //foreach (var item in items)
         //{

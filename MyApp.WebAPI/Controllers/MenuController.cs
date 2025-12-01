@@ -4,6 +4,7 @@ using MyApp.Application.Abstractions.Menus;
 using MyApp.Application.Abstractions.Menus.Dtos;
 using MyApp.Application.Abstractions.Restaurants;
 using MyApp.WebAPI.Extensions;
+using System.ComponentModel.DataAnnotations;
 
 namespace MyApp.WebAPI.Controllers
 {
@@ -39,11 +40,10 @@ namespace MyApp.WebAPI.Controllers
         {
             var dto = new CreateCategoryDto(
                 Name: request.Name,
-                Order: request.Order,
-                RestaurantId: await GetMainRestaurantIdAsync() // فقط یک رستوران داریم
+                Order: request.Order
             );
 
-            var categoryId = await _menuService.CreateCategoryAsync(dto, UserId);
+            var categoryId = await _menuService.CreateCategoryAsync(dto);
             return CreatedAtAction(nameof(GetCategory), new { categoryId }, categoryId);
         }
 
@@ -61,7 +61,7 @@ namespace MyApp.WebAPI.Controllers
                 Order: request.Order
             );
 
-            await _menuService.UpdateCategoryAsync(dto, UserId);
+            await _menuService.UpdateCategoryAsync(dto);
             return NoContent();
         }
 
@@ -74,7 +74,7 @@ namespace MyApp.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCategory(Guid categoryId)
         {
-            await _menuService.DeleteCategoryAsync(categoryId, UserId);
+            await _menuService.DeleteCategoryAsync(categoryId);
             return NoContent();
         }
 
@@ -93,6 +93,19 @@ namespace MyApp.WebAPI.Controllers
             return Ok(category);
         }
 
+        [HttpPatch("categories/{categoryId}/order")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> MoveCategoryOrder(Guid categoryId, bool isUp)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            await _menuService.CategoryMoveOrderAsync(categoryId, isUp);
+            return NoContent();
+        }
+
+
+
         // ====================== Item Endpoints ======================
 
         [HttpGet("items/{itemId}")]
@@ -100,7 +113,7 @@ namespace MyApp.WebAPI.Controllers
         public async Task<IActionResult> GetMenuItem(Guid itemId)
         {
 
-            var dto = await _menuService.GetItemAsync(itemId, UserId);
+            var dto = await _menuService.GetItemAsync(itemId);
             return Ok(dto);
         }
 
@@ -121,7 +134,7 @@ namespace MyApp.WebAPI.Controllers
                 CategoryId: request.CategoryId
             );
 
-            var itemId = await _menuService.CreateItemAsync(dto, UserId);
+            var itemId = await _menuService.CreateItemAsync(dto);
             return CreatedAtAction(nameof(GetCategory), new { categoryId = request.CategoryId }, itemId);
         }
 
@@ -141,7 +154,7 @@ namespace MyApp.WebAPI.Controllers
                 IsAvailable: request.IsAvailable
             );
 
-            await _menuService.UpdateItemAsync(dto, UserId);
+            await _menuService.UpdateItemAsync(dto);
             return NoContent();
         }
 
@@ -152,7 +165,7 @@ namespace MyApp.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> DeleteMenuItem(Guid itemId)
         {
-            await _menuService.DeleteItemAsync(itemId, UserId);
+            await _menuService.DeleteItemAsync(itemId);
             return NoContent();
         }
 
@@ -163,7 +176,18 @@ namespace MyApp.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> ToggleAvailability(Guid itemId)
         {
-            await _menuService.ToggleAvailabilityAsync(itemId, UserId);
+            await _menuService.ToggleAvailabilityAsync(itemId);
+            return NoContent();
+        }
+
+        [HttpPatch("items/{categoryId}/order")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> MoveItemOrder(Guid categoryId, Guid itemId, bool isUp)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            await _menuService.ItemMoveOrderAsync(categoryId, itemId, isUp);
             return NoContent();
         }
 

@@ -5,10 +5,10 @@ namespace MyApp.Application.Abstractions.Subscribers
 {
     public interface IEmailSubscriberService
     {
-        Task SubscribeAsync(Guid restaurantId, string email);
+        Task SubscribeAsync(string email);
         Task ConfirmAsync(string token);
         Task UnsubscribeAsync(string emailOrToken);
-        Task<List<string>> GetActiveEmailsAsync(Guid restaurantId);
-        Task<PagedResult<SubscriberDto>> GetListAsync(Guid restaurantId, int page = 1, int pageSize = 50);
+        Task<List<string>> GetActiveEmailsAsync();
+        Task<PagedResult<SubscriberDto>> GetListAsync(int page = 1, int pageSize = 50);
     }
 }

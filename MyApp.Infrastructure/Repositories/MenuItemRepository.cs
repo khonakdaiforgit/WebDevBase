@@ -19,6 +19,17 @@ namespace MyApp.Infrastructure.Repositories
                         .ToListAsync(ct);
         }
 
+        public async Task<int> MaxOrderAsync(CancellationToken ct = default)
+        {
+            var maxOrder = await _collection
+               .Find(Builders<MenuItem>.Filter.Empty) // همه داکیومنت‌ها
+               .SortByDescending(c => c.Order)
+               .Project(c => c.Order) // فقط فیلد Order رو بخون (خیلی بهینه)
+               .FirstOrDefaultAsync(ct);
+
+            return maxOrder;
+        }
+
         public async Task ToggleAvailabilityAsync(Guid itemId, CancellationToken ct = default)
         {
             var filter = Builders<MenuItem>.Filter.Eq(x => x.Id, itemId);

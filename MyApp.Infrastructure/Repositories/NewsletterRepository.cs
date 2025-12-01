@@ -12,15 +12,12 @@ public class NewsletterRepository : GenericRepository<Newsletter>, INewsletterRe
     public NewsletterRepository(MongoDbContext context) : base(context) { }
 
     public async Task<PagedResult<Newsletter>> GetPagedByRestaurantAsync(
-        Guid? restaurantId,
         NewsletterStatus? status = null,
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default)
     {
         var filter = Builders<Newsletter>.Filter.Empty;
-        if (restaurantId.HasValue)
-            filter &= Builders<Newsletter>.Filter.Eq(n => n.RestaurantId, restaurantId.Value);
         if (status.HasValue)
             filter &= Builders<Newsletter>.Filter.Eq(n => n.Status, status.Value);
 

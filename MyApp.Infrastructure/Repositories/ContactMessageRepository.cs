@@ -13,7 +13,6 @@ public class ContactMessageRepository : GenericRepository<ContactMessage>, ICont
     public ContactMessageRepository(MongoDbContext context) : base(context) { }
 
     public async Task<PagedResult<ContactMessage>> GetPagedAsync(
-        Guid? restaurantId = null,
         bool? onlyUnread = null,
         Expression<Func<ContactMessage, object>>? orderBy = null,
         bool descending = true,
@@ -22,8 +21,6 @@ public class ContactMessageRepository : GenericRepository<ContactMessage>, ICont
         CancellationToken ct = default)
     {
         var filter = Builders<ContactMessage>.Filter.Empty;
-        if (restaurantId.HasValue)
-            filter &= Builders<ContactMessage>.Filter.Eq(m => m.RestaurantId, restaurantId.Value);
         if (onlyUnread == true)
             filter &= Builders<ContactMessage>.Filter.Eq(m => m.IsRead, false);
 

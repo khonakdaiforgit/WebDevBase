@@ -6,5 +6,6 @@ namespace MyApp.Application.Abstractions.Menus.Dtos
         string Description,
         decimal Price,
         string ImageUrl,
-        bool IsAvailable);
+        bool IsAvailable,
+        int Order);
 }

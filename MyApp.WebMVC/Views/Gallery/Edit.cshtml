@@ -1,0 +1,155 @@
+﻿@model MyApp.WebMVC.Views.Gallery.ViewModels.EditGalleryItemViewModel
+@{
+    ViewData["Title"] = "Edit Gallery Photo";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-edit text-warning"></i> Edit Photo
+        </h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Gallery
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-image"></i> Photo Details
+                        <small class="ms-3 text-muted">
+                            Uploaded on @Model.UploadDate.ToString("MMMM dd, yyyy 'at' h:mm tt")
+                        </small>
+                    </h6>
+                </div>
+
+                <form asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="UploadDate" />
+                    <input type="hidden" asp-for="CurrentImageUrl" /> <!-- برای حذف عکس قدیمی -->
+
+                    <div class="card-body">
+
+                        <!-- بخش آپلود عکس جدید -->
+                        <div class="row mb-5">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-primary">
+                                    <i class="fas fa-camera"></i> Current Photo
+                                </label>
+                                <div class="text-center p-3 bg-light rounded border">
+                                    <img src="@Model.CurrentImageUrl"
+                                         class="img-fluid rounded shadow"
+                                         style="max-height: 380px; object-fit: contain;"
+                                         alt="Current gallery photo">
+                                    @if (!Model.IsVisible)
+                                    {
+                                        <div class="mt-3">
+                                            <span class="badge bg-danger fs-6 px-4 py-2">
+                                                <i class="fas fa-eye-slash"></i> Hidden from Website
+                                            </span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="NewImageFile" class="form-label fw-bold text-success">
+                                    <i class="fas fa-cloud-upload-alt"></i> Replace with New Photo (Optional)
+                                </label>
+                                <input asp-for="NewImageFile" type="file" accept="image/*" class="form-control form-control-lg" />
+                                <div class="form-text">
+                                    Leave empty to keep current photo · JPG, PNG, WebP · Max 5MB
+                                </div>
+
+                                <div id="newImagePreview" class="text-center mt-3" style="display:none;">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i> New photo selected — will replace current one after saving
+                                    </div>
+                                    <img id="previewNewImg" src="" class="img-fluid rounded shadow" style="max-height:300px;" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-5">
+
+                        <!-- کپشن -->
+                        <div class="mb-4">
+                            <label asp-for="Caption" class="form-label">
+                                Caption <small class="text-muted">(Optional)</small>
+                            </label>
+                            <textarea asp-for="Caption" class="form-control" rows="4"
+                                      placeholder="Describe this beautiful moment..."></textarea>
+                        </div>
+
+                        <!-- نمایش در سایت -->
+                        <div class="form-check mb-3" style="padding-left:1.6rem">
+                            <input asp-for="IsVisible" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsVisible" class="form-check-label">Show this photo on website immediately</label>
+                        </div>
+
+                        <div class="d-grid d-md-flex justify-content-end gap-3">
+                            <a asp-action="Index" class="btn btn-light btn-lg px-4">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- هشدار جایگزینی -->
+            <div class="alert alert-info">
+                <i class="fas fa-lightbulb"></i>
+                <strong>Tip:</strong> Uploading a new photo will automatically replace the current one.
+                The old photo will be deleted from the server.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // پیش‌نمایش عکس جدید
+        document.querySelector('[name="NewImageFile"]').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('newImagePreview');
+            const img = document.getElementById('previewNewImg');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+
+        // تنظیم وضعیت سوییچ
+        document.getElementById('isVisibleSwitch').checked = @Model.IsVisible.ToString().ToLower();
+    </script>
+}

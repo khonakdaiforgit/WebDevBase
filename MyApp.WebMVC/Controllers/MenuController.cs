@@ -6,6 +6,7 @@ using MyApp.WebMVC.Extensions; // برای WithJwt
 using MyApp.WebMVC.Views.Menu.ViewModels;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -50,7 +51,8 @@ namespace MyApp.WebMVC.Controllers
                         Description = itemDto.Description ?? string.Empty,
                         Price = itemDto.Price,
                         ImageUrl = itemDto.ImageUrl ?? string.Empty,
-                        IsAvailable = itemDto.IsAvailable
+                        IsAvailable = itemDto.IsAvailable,
+                        Order=itemDto.Order
                     }).ToList() ?? new List<MenuItemViewModel>()
                 })
                 .OrderBy(c => c.Order).ToList()
@@ -90,7 +92,7 @@ namespace MyApp.WebMVC.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            var dto = new CreateCategoryDto(model.Name, model.Order, Guid.Empty); // RestaurantId از API گرفته می‌شه
+            var dto = new CreateCategoryDto(model.Name, model.Order); // RestaurantId از API گرفته می‌شه
             var response = await Api().PostAsJsonAsync("api/menu/categories", dto);
 
             if (response.IsSuccessStatusCode)
@@ -144,6 +146,21 @@ namespace MyApp.WebMVC.Controllers
         {
             var response = await Api().DeleteAsync($"api/menu/categories/{id}");
             TempData[response.IsSuccessStatusCode ? "Success" : "Error"] = response.IsSuccessStatusCode ? "Deleted!" : "Failed to delete.";
+            return RedirectToAction("Index");
+        }
+
+        // فقط این متد رو اضافه کن
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MoveCategoryOrder(Guid categoryId, bool isUp)
+        {
+            var response = await Api().PatchAsync($"api/menu/categories/{categoryId}/order?isUp={isUp}", null);
+
+            TempData[response.IsSuccessStatusCode ? "Success" : "Error"] =
+                response.IsSuccessStatusCode
+                    ? $"Category moved {(isUp ? "up" : "down")} successfully!"
+                    : "Failed to move category.";
+
             return RedirectToAction("Index");
         }
 
@@ -302,6 +319,30 @@ namespace MyApp.WebMVC.Controllers
 
             TempData["Error"] = "Failed to update item.";
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MoveItemOrder(Guid categoryId, Guid itemId, bool isUp)
+        {
+            var content = new StringContent(
+                JsonSerializer.Serialize(isUp),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var response = await Api().PatchAsync($"api/menu/items/{categoryId}/order?itemId={itemId}&isUp={isUp}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["Success"] = $"Item moved {(isUp ? "up" : "down")} successfully!";
+            }
+            else
+            {
+                TempData["Error"] = "Failed to move item order.";
+            }
+
+            return RedirectToAction("Index");
         }
 
     }

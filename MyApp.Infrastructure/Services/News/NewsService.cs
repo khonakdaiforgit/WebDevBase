@@ -19,16 +19,14 @@ namespace MyApp.Infrastructure.Services.News
             _currentUser = currentUser;
         }
 
-        public async Task<Guid> CreateAsync(CreateNewsDto dto, Guid callerUserId)
+        public async Task<Guid> CreateAsync(CreateNewsDto dto)
         {
-            await ValidateRestaurantAccessAsync(dto.RestaurantId, callerUserId);
 
             var news = new Domain.Entities.News
             {
                 Title = dto.Title.Trim(),
                 Content = dto.Content.Trim(),
                 ImageUrl = dto.ImageUrl,
-                RestaurantId = dto.RestaurantId,
                 PublishDate = DateTime.UtcNow,
                 IsPublished = false
             };
@@ -39,12 +37,11 @@ namespace MyApp.Infrastructure.Services.News
             return news.Id;
         }
 
-        public async Task UpdateAsync(UpdateNewsDto dto, Guid callerUserId)
+        public async Task UpdateAsync(UpdateNewsDto dto)
         {
             var news = await _unitOfWork.News.GetByIdAsync(dto.Id)
                 ?? throw new NotFoundException("News not found.");
 
-            await ValidateRestaurantAccessAsync(news.RestaurantId, callerUserId);
 
             if (dto.Title is not null) news.Title = dto.Title.Trim();
             if (dto.Content is not null) news.Content = dto.Content.Trim();
@@ -60,23 +57,21 @@ namespace MyApp.Infrastructure.Services.News
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Guid newsId, Guid callerUserId)
+        public async Task DeleteAsync(Guid newsId)
         {
             var news = await _unitOfWork.News.GetByIdAsync(newsId)
                 ?? throw new NotFoundException("News not found.");
 
-            await ValidateRestaurantAccessAsync(news.RestaurantId, callerUserId);
 
             await _unitOfWork.News.DeleteAsync(newsId);
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task PublishAsync(Guid newsId, Guid callerUserId)
+        public async Task PublishAsync(Guid newsId)
         {
             var news = await _unitOfWork.News.GetByIdAsync(newsId)
                 ?? throw new NotFoundException("News not found.");
 
-            await ValidateRestaurantAccessAsync(news.RestaurantId, callerUserId);
 
             news.Publish();
             news.PublishDate = DateTime.UtcNow;
@@ -85,12 +80,11 @@ namespace MyApp.Infrastructure.Services.News
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task UnpublishAsync(Guid newsId, Guid callerUserId)
+        public async Task UnpublishAsync(Guid newsId)
         {
             var news = await _unitOfWork.News.GetByIdAsync(newsId)
                 ?? throw new NotFoundException("News not found.");
 
-            await ValidateRestaurantAccessAsync(news.RestaurantId, callerUserId);
 
             news.Unpublish();
 
@@ -112,19 +106,11 @@ namespace MyApp.Infrastructure.Services.News
                 news.IsPublished);
         }
 
-        public async Task<PagedResult<NewsListItemDto>> GetListAsync(Guid? restaurantId = null, int page = 1, int pageSize = 20)
+        public async Task<PagedResult<NewsListItemDto>> GetListAsync( int page = 1, int pageSize = 20)
         {
-            if (!restaurantId.HasValue)
-            {
-                restaurantId = await GetCurrentUserRestaurantIdAsync();
-            }
-            else
-            {
-                await ValidateRestaurantAccessAsync(restaurantId.Value, _currentUser.UserId.Value);
-            }
+     
 
             var paged = await _unitOfWork.News.GetPagedByRestaurantAsync(
-                restaurantId.Value,
                 onlyPublished: null, // return both published & draft for admin panel
                 page,
                 pageSize);

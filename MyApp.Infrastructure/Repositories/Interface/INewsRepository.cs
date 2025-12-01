@@ -6,9 +6,8 @@ namespace MyApp.Infrastructure.Repositories.Interface
 {
     public interface INewsRepository : IGenericRepository<News>
     {
-        Task<IReadOnlyList<News>> GetPublishedByRestaurantAsync(Guid restaurantId, CancellationToken ct = default);
+        Task<IReadOnlyList<News>> GetPublishedByRestaurantAsync(CancellationToken ct = default);
         Task<PagedResult<News>> GetPagedByRestaurantAsync(
-            Guid restaurantId,
             bool? onlyPublished = null,
             int page = 1,
             int pageSize = 20,

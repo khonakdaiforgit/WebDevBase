@@ -10,14 +10,11 @@ namespace MyApp.Infrastructure.Services.Users
     public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IAuthorizationService _authz;
 
         public UserService(
-            IUnitOfWork unitOfWork,
-            IAuthorizationService authz)
+            IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _authz = authz;
         }
 
         public async Task<UserDto?> GetCurrentUserAsync(Guid userId)
@@ -26,11 +23,9 @@ namespace MyApp.Infrastructure.Services.Users
             return user == null ? null : MapToDto(user);
         }
 
-        public async Task DeactivateAsync(Guid targetUserId, Guid callerUserId)
+        public async Task DeactivateAsync(Guid targetUserId)
         {
-            if (!await _authz.IsOwnerAsync(callerUserId))
-                throw new UnauthorizedAccessException("Only project owner can deactivate users.");
-
+ 
             var user = await _unitOfWork.Users.GetByIdAsync(targetUserId)
                 ?? throw new KeyNotFoundException("User not found.");
 
@@ -39,10 +34,8 @@ namespace MyApp.Infrastructure.Services.Users
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task ActivateAsync(Guid targetUserId, Guid callerUserId)
+        public async Task ActivateAsync(Guid targetUserId)
         {
-            if (!await _authz.IsOwnerAsync(callerUserId))
-                throw new UnauthorizedAccessException("Only project owner can activate users.");
 
             var user = await _unitOfWork.Users.GetByIdAsync(targetUserId)
                 ?? throw new KeyNotFoundException("User not found.");

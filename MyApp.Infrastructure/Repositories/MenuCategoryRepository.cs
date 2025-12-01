@@ -10,11 +10,14 @@ public class MenuCategoryRepository : GenericRepository<MenuCategory>, IMenuCate
 {
     public MenuCategoryRepository(MongoDbContext context) : base(context) { }
 
-    public async Task<IReadOnlyList<MenuCategory>> GetByRestaurantAsync(Guid restaurantId, CancellationToken ct = default)
+    public async Task<int> MaxOrderAsync(CancellationToken ct = default)
     {
-        return await _collection
-            .Find(c => c.RestaurantId == restaurantId)
-            .SortBy(c => c.Order)
-            .ToListAsync(ct);
+        var maxOrder = await _collection
+           .Find(Builders<MenuCategory>.Filter.Empty) // همه داکیومنت‌ها
+           .SortByDescending(c => c.Order)
+           .Project(c => c.Order) // فقط فیلد Order رو بخون (خیلی بهینه)
+           .FirstOrDefaultAsync(ct);
+
+        return maxOrder;
     }
 }

@@ -17,17 +17,17 @@ public class RestaurantRepository : GenericRepository<Restaurant>, IRestaurantRe
             .ToListAsync(ct);
     }
 
-    public async Task<Restaurant> GetMain()
+    public async Task<Restaurant> GetMain(CancellationToken ct = default)
     {
         return await _collection
-                  .Find(r => r.Mian==true)
+                  .Find(r => r.Mian == true)
                   .FirstOrDefaultAsync();
     }
 
-    public async Task<bool> IsOwnerAsync(Guid restaurantId, Guid userId, CancellationToken ct = default)
+    public async Task<bool> IsOwnerAsync(Guid userId, CancellationToken ct = default)
     {
         var count = await _collection
-            .CountDocumentsAsync(r => r.Id == restaurantId && r.OwnerUserId == userId, cancellationToken: ct);
+            .CountDocumentsAsync(r => r.OwnerUserId == userId && r.Mian == true, cancellationToken: ct);
 
         return count > 0;
     }

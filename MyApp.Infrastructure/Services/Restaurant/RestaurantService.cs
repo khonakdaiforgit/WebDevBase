@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using MyApp.Application.Abstractions.Restaurants;
 using MyApp.Application.Abstractions.Restaurants.Dtos;
+using MyApp.Application.Abstractions.Restaurants.Extensions;
+using MyApp.Application.Abstractions.Users;
 using MyApp.Domain.ValueObjects;
 using MyApp.Infrastructure.Common;
 using MyApp.Infrastructure.Common.Exceptions;
-using MyApp.Application.Abstractions.Restaurants.Extensions;
 
 namespace MyApp.Infrastructure.Services.Restaurant
 {
@@ -12,17 +13,22 @@ namespace MyApp.Infrastructure.Services.Restaurant
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUser;
+
 
         public RestaurantService(
             IUnitOfWork unitOfWork,
+            ICurrentUserService currentUserService,
             IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _currentUser = currentUserService;
         }
 
-        public async Task<Guid> CreateAsync(CreateRestaurantDto dto, Guid ownerUserId)
+        public async Task<Guid> CreateAsync(CreateRestaurantDto dto)
         {
+
             var restaurant = new Domain.Entities.Restaurant
             {
                 Name = dto.Name,
@@ -30,7 +36,7 @@ namespace MyApp.Infrastructure.Services.Restaurant
                 Phone = dto.Phone,
                 Email = dto.Email,
                 LogoUrl = dto.LogoUrl,
-                OwnerUserId = ownerUserId
+                OwnerUserId = _currentUser.UserId.Value
             };
 
             restaurant.SetLocation(dto.Latitude, dto.Longitude);
@@ -49,9 +55,9 @@ namespace MyApp.Infrastructure.Services.Restaurant
             return restaurant.Id;
         }
 
-        public async Task UpdateAsync(UpdateRestaurantDto dto, Guid callerUserId)
+        public async Task UpdateAsync(UpdateRestaurantDto dto)
         {
-            var restaurant = await GetRestaurantOrThrowAsync(dto.Id, callerUserId);
+            var restaurant = await GetRestaurantOrThrowAsync(dto.Id);
 
             if (dto.Name != null) restaurant.Name = dto.Name;
             if (dto.Address != null) restaurant.Address = dto.Address;
@@ -75,27 +81,27 @@ namespace MyApp.Infrastructure.Services.Restaurant
             return restaurant == null ? null : _mapper.Map<RestaurantDto>(restaurant);
         }
 
-        public async Task UpdateLocationAsync(Guid restaurantId, double latitude, double longitude, Guid callerId)
+        public async Task UpdateLocationAsync(Guid restaurantId, double latitude, double longitude)
         {
-            var restaurant = await GetRestaurantOrThrowAsync(restaurantId, callerId);
+            var restaurant = await GetRestaurantOrThrowAsync(restaurantId);
             restaurant.SetLocation(latitude, longitude);
 
             await _unitOfWork.Restaurants.AddAsync(restaurant);
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task UpdateLogoAsync(UpdateLogoDto dto, Guid callerUserId)
+        public async Task UpdateLogoAsync(UpdateLogoDto dto)
         {
-            var restaurant = await GetRestaurantOrThrowAsync(dto.RestaurantId, callerUserId);
+            var restaurant = await GetRestaurantOrThrowAsync(dto.RestaurantId);
             restaurant.UpdateLogo(dto.LogoUrl);
 
             await _unitOfWork.Restaurants.AddAsync(restaurant);
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task UpdateWorkingHoursAsync(UpdateWorkingHoursDto dto, Guid callerUserId)
+        public async Task UpdateWorkingHoursAsync(UpdateWorkingHoursDto dto)
         {
-            var restaurant = await GetRestaurantOrThrowAsync(dto.RestaurantId, callerUserId);
+            var restaurant = await GetRestaurantOrThrowAsync(dto.RestaurantId);
 
             var domainHours = dto.WorkingHours?.ToDictionary(
                kvp => kvp.Key,
@@ -109,9 +115,9 @@ namespace MyApp.Infrastructure.Services.Restaurant
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<bool> IsOwnerAsync(Guid restaurantId, Guid userId)
+        public async Task<bool> IsOwnerAsync(Guid userId)
         {
-            return await _unitOfWork.Restaurants.IsOwnerAsync(restaurantId, userId);
+            return await _unitOfWork.Restaurants.IsOwnerAsync(userId);
         }
 
         public async Task<RestaurantDto?> GetByOwnerIdAsync(Guid ownerUserId)
@@ -122,15 +128,12 @@ namespace MyApp.Infrastructure.Services.Restaurant
         }
 
         // --- متد کمکی ---
-        private async Task<Domain.Entities.Restaurant> GetRestaurantOrThrowAsync(Guid restaurantId, Guid callerUserId)
+        private async Task<Domain.Entities.Restaurant> GetRestaurantOrThrowAsync(Guid restaurantId)
         {
             var restaurant = await _unitOfWork.Restaurants.GetByIdAsync(restaurantId, CancellationToken.None);
 
             if (restaurant == null)
                 throw new NotFoundException($"Restaurant with ID {restaurantId} not found.");
-
-            if (restaurant.OwnerUserId != callerUserId)
-                throw new ForbiddenException("You are not the owner of this restaurant.");
 
             return restaurant;
         }
@@ -147,5 +150,7 @@ namespace MyApp.Infrastructure.Services.Restaurant
 
             return _mapper.Map<PublicRestaurantDto>(restaurant);
         }
+
+       
     }
 }

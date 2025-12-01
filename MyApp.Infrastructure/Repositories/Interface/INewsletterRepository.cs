@@ -7,7 +7,6 @@ namespace MyApp.Infrastructure.Repositories.Interface
     public interface INewsletterRepository : IGenericRepository<Newsletter>
     {
         Task<PagedResult<Newsletter>> GetPagedByRestaurantAsync(
-            Guid? restaurantId,
             NewsletterStatus? status = null,
             int page = 1,
             int pageSize = 20,

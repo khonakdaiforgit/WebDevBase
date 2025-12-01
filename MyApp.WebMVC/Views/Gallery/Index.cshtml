@@ -1,0 +1,110 @@
+﻿@model MyApp.WebMVC.Views.Gallery.ViewModels.GalleryIndexViewModel
+@{
+    ViewData["Title"] = "Gallery Management";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-images text-primary"></i> Gallery Management
+        </h1>
+        <a asp-action="Create" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus"></i> Upload New Photo
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                All Photos (@Model.TotalCount)
+            </h6>
+        </div>
+        <div class="card-body">
+            @if (!Model.Items.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-images fa-5x text-muted mb-3"></i>
+                    <p class="text-muted">No photos yet. Start uploading!</p>
+                </div>
+            }
+            else
+            {
+                <div class="row g-4" id="galleryGrid">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="col-md-4 col-lg-3">
+                            <div class="card h-100 shadow-sm border-0 gallery-item">
+                                <div class="position-relative">
+                                    <img src="@item.ImageUrl" class="card-img-top" alt="@item.Caption" style="height:220px; object-fit:cover;">
+                                    @if (!item.IsVisible)
+                                    {
+                                        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center">
+                                            <span class="text-white fs-4 fw-bold">HIDDEN</span>
+                                        </div>
+                                    }
+                                    <div class="position-absolute top-0 end-0 p-2">
+                                        <div class="btn-group">
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
+                                                  onsubmit="return confirm('Are you sure you want to delete this photo?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <p class="card-text text-muted small">
+                                        <i class="far fa-calendar"></i> @item.UploadDate.ToString("MM/dd/yyyy")
+                                    </p>
+                                    <p class="card-text flex-grow-1">
+                                        <strong>@(string.IsNullOrEmpty(item.Caption) ? "No caption" : item.Caption)</strong>
+                                    </p>
+                                    <div class="mt-auto">
+                                        <button onclick="toggleVisibility('@item.Id', @(item.IsVisible ? "false" : "true"))"
+                                                class="btn btn-sm @(item.IsVisible ? "btn-outline-secondary" : "btn-success") w-100">
+                                            <i class="fas @(item.IsVisible ? "fa-eye-slash" : "fa-eye")"></i>
+                                            @(item.IsVisible ? "Hide from Website" : "Show on Website")
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function toggleVisibility(id, makeVisible) {
+            await fetch(`/Gallery/ToggleVisibility?id=${id}&makeVisible=${makeVisible}`, {
+                method: 'POST',
+                headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value }
+            });
+            location.reload();
+        }
+    </script>
+}

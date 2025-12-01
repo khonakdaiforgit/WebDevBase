@@ -44,7 +44,7 @@ namespace MyApp.WebAPI.Controllers
         public async Task<ActionResult<Guid>> Create([FromBody] CreateRestaurantDto dto)
         {
             var userId = this.GetUserId();
-            var id = await _restaurantService.CreateAsync(dto, userId);
+            var id = await _restaurantService.CreateAsync(dto);
             return CreatedAtAction(nameof(GetProfile), new { }, id);
         }
 
@@ -52,7 +52,7 @@ namespace MyApp.WebAPI.Controllers
         public async Task<IActionResult> Update([FromBody] UpdateRestaurantDto dto)
         {
             var userId = this.GetUserId();
-            await _restaurantService.UpdateAsync(dto, userId);
+            await _restaurantService.UpdateAsync(dto);
             return NoContent();
         }
 
@@ -60,7 +60,7 @@ namespace MyApp.WebAPI.Controllers
         public async Task<IActionResult> UpdateLogo([FromBody] UpdateLogoDto dto)
         {
             var userId = this.GetUserId();
-            await _restaurantService.UpdateLogoAsync(dto, userId);
+            await _restaurantService.UpdateLogoAsync(dto);
             return NoContent();
         }
 
@@ -68,7 +68,7 @@ namespace MyApp.WebAPI.Controllers
         public async Task<IActionResult> UpdateWorkingHours([FromBody] UpdateWorkingHoursDto dto)
         {
             var userId = this.GetUserId();
-            await _restaurantService.UpdateWorkingHoursAsync(dto, userId);
+            await _restaurantService.UpdateWorkingHoursAsync(dto);
             return NoContent();
         }
 

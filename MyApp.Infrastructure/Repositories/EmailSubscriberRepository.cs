@@ -16,8 +16,8 @@ public class EmailSubscriberRepository : GenericRepository<EmailSubscriber>, IEm
     public async Task<EmailSubscriber?> GetByUnsubscribeTokenAsync(string token, CancellationToken ct = default)
         => await _collection.Find(s => s.UnsubscribeToken == token).FirstOrDefaultAsync(ct);
 
-    public async Task<IReadOnlyList<EmailSubscriber>> GetActiveByRestaurantAsync(Guid restaurantId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<EmailSubscriber>> GetActiveByRestaurantAsync(CancellationToken ct = default)
         => await _collection
-            .Find(s => s.RestaurantId == restaurantId && s.IsActive)
+            .Find(s => s.IsActive)
             .ToListAsync(ct);
 }

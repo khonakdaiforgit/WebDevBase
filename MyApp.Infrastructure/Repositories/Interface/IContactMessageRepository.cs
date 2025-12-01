@@ -8,7 +8,6 @@ namespace MyApp.Infrastructure.Repositories.Interface
     public interface IContactMessageRepository : IGenericRepository<ContactMessage>
     {
         Task<PagedResult<ContactMessage>> GetPagedAsync(
-            Guid? restaurantId = null,
             bool? onlyUnread = null,
             Expression<Func<ContactMessage, object>>? orderBy = null,
             bool descending = true,

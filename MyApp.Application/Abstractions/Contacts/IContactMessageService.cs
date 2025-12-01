@@ -5,8 +5,8 @@ namespace MyApp.Application.Abstractions.Contacts
 {
     public interface IContactMessageService
     {
-        Task<Guid> SubmitAsync(string name, string email, string message, Guid? restaurantId = null);
-        Task MarkAsReadAsync(Guid messageId, Guid callerUserId);
-        Task<PagedResult<ContactMessageDto>> GetListAsync(Guid? restaurantId = null, bool? onlyUnread = null, int page = 1, int pageSize = 20);
+        Task<Guid> SubmitAsync(string name, string email, string message);
+        Task MarkAsReadAsync(Guid messageId);
+        Task<PagedResult<ContactMessageDto>> GetListAsync(bool? onlyUnread = null, int page = 1, int pageSize = 20);
     }
 }

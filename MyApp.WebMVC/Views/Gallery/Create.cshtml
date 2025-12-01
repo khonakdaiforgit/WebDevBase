@@ -1,0 +1,97 @@
+﻿@model MyApp.WebMVC.Views.Gallery.ViewModels.CreateGalleryItemViewModel
+@{
+    ViewData["Title"] = "Upload New Photo";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Upload New Photo</h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Gallery
+        </a>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        @Html.AntiForgeryToken()
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-cloud-upload-alt"></i> Add Photo to Gallery
+                </h6>
+            </div>
+
+            <div class="card-body">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+
+                        <div class="mb-4">
+                            <label asp-for="ImageFile" class="form-label">Photo</label>
+                            <input asp-for="ImageFile" type="file" accept="image/*" class="form-control" required />
+                            <div class="form-text">Recommended: High-quality JPG, PNG or WebP (max 5MB)</div>
+                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                        </div>
+
+                        <div id="imagePreview" class="text-center mb-4" style="display:none;">
+                            <img id="previewImg" src="" class="img-fluid rounded shadow" style="max-height:400px;" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Caption" class="form-label">Caption (Optional)</label>
+                            <textarea asp-for="Caption" class="form-control" rows="3" placeholder="e.g., Our famous Sunday brunch setup..."></textarea>
+                        </div>
+
+                 @*        <div class="form-check mb-4">
+                            <input asp-for="IsVisible" class="form-check-input" type="checkbox" checked />
+                            <label asp-for="IsVisible" class="form-check-label">
+                                Show this photo on website immediately
+                            </label>
+                        </div> *@
+
+                        <div class="form-check mb-3" style="padding-left:1.6rem">
+                            <input asp-for="IsVisible" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsVisible" class="form-check-label">Show this photo on website immediately</label>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer text-center bg-light">
+                <button type="submit" class="btn btn-lg btn-primary px-5">
+                    <i class="fas fa-cloud-upload-alt"></i> Upload Photo
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelector('[name="ImageFile"]').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            const img = document.getElementById('previewImg');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+    </script>
+}

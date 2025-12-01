@@ -5,7 +5,7 @@ namespace MyApp.Application.Abstractions.Newsletters
 {
     public interface INewsletterService
     {
-        Task<Guid> CreateAsync(string subject, string content, Guid RestaurantId);
+        Task<Guid> CreateAsync(string subject, string content);
         Task UpdateAsync(Guid id, string subject, string content);
         Task DeleteAsync(Guid id);
 

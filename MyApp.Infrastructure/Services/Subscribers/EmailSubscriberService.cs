@@ -62,7 +62,7 @@ public class EmailSubscriberService : IEmailSubscriberService
     }
 
 
-    public async Task SubscribeAsync(Guid restaurantId, string email)
+    public async Task SubscribeAsync(string email)
     {
         var existing = await _unitOfWork.EmailSubscribers.GetByEmailAsync(email);
         if (existing != null)
@@ -86,7 +86,6 @@ public class EmailSubscriberService : IEmailSubscriberService
 
             var subscriber = new EmailSubscriber
             {
-                RestaurantId = restaurantId,
                 Email = email,
                 UnsubscribeToken = GenerateToken(),
                 IsActive = false
@@ -95,29 +94,27 @@ public class EmailSubscriberService : IEmailSubscriberService
         }
     }
 
-    public async Task<List<string>> GetActiveEmailsAsync(Guid restaurantId)
+    public async Task<List<string>> GetActiveEmailsAsync()
     {
-        var restaurant = await _unitOfWork.Restaurants.GetByIdAsync(restaurantId)
-                  ?? throw new NotFoundException("Restaurant", restaurantId);
+        var restaurant = await _unitOfWork.Restaurants.GetMain();
 
         var callerId = _currentUser.UserId ?? throw new UnauthorizedAccessException();
         if (restaurant.OwnerUserId != callerId)
             throw new ForbiddenException("You are not the owner of this restaurant.");
 
-        var subscribers = await _unitOfWork.EmailSubscribers.GetActiveByRestaurantAsync(restaurantId);
+        var subscribers = await _unitOfWork.EmailSubscribers.GetActiveByRestaurantAsync();
         return subscribers.Select(s => s.Email).ToList();
     }
 
-    public async Task<PagedResult<SubscriberDto>> GetListAsync(Guid restaurantId, int page = 1, int pageSize = 50)
+    public async Task<PagedResult<SubscriberDto>> GetListAsync(int page = 1, int pageSize = 50)
     {
-        var restaurant = await _unitOfWork.Restaurants.GetByIdAsync(restaurantId)
-                  ?? throw new NotFoundException("Restaurant", restaurantId);
+        var restaurant = await _unitOfWork.Restaurants.GetMain();
 
         var callerId = _currentUser.UserId ?? throw new UnauthorizedAccessException();
         if (restaurant.OwnerUserId != callerId)
             throw new ForbiddenException("You are not the owner of this restaurant.");
 
-        var subscribers = await _unitOfWork.EmailSubscribers.GetActiveByRestaurantAsync(restaurantId);
+        var subscribers = await _unitOfWork.EmailSubscribers.GetActiveByRestaurantAsync();
         var dtos = _mapper.Map<List<SubscriberDto>>(subscribers);
 
         var total = dtos.Count;

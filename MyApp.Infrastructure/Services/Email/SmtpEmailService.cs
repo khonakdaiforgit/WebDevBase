@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using MyApp.Application.Abstractions.Email;
 using MyApp.Infrastructure.Services.Email.Settings;
 using System.Net;
 using System.Net.Mail;
-using System.Text;
 
 namespace MyApp.Infrastructure.Services.Email;
 

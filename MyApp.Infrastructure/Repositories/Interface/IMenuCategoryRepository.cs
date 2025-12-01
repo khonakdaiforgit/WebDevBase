@@ -5,6 +5,6 @@ namespace MyApp.Infrastructure.Repositories.Interface
 {
     public interface IMenuCategoryRepository : IGenericRepository<MenuCategory>
     {
-        Task<IReadOnlyList<MenuCategory>> GetByRestaurantAsync(Guid restaurantId, CancellationToken ct = default);
+        Task<int> MaxOrderAsync(CancellationToken ct = default);
     }
 }

@@ -12,13 +12,11 @@ public class GalleryItemRepository : GenericRepository<GalleryItem>, IGalleryIte
     public GalleryItemRepository(MongoDbContext context) : base(context) { }
 
     public async Task<PagedResult<GalleryItem>> GetVisibleByRestaurantAsync(
-        Guid restaurantId,
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default)
     {
-        var filter = Builders<GalleryItem>.Filter.Eq(x => x.RestaurantId, restaurantId) &
-                     Builders<GalleryItem>.Filter.Eq(x => x.IsVisible, true);
+        var filter = Builders<GalleryItem>.Filter.Eq(x => x.IsVisible, true);
 
         var total = await _collection.CountDocumentsAsync(filter, cancellationToken: ct);
         var items = await _collection

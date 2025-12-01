@@ -5,11 +5,11 @@ namespace MyApp.Application.Abstractions.Galleries
 {
     public interface IGalleryService
     {
-        Task<Guid> UploadAsync(UploadGalleryItemDto dto, Guid callerUserId);
-        Task UpdateAsync(UpdateGalleryItemDto dto, Guid callerUserId);
-        Task DeleteAsync(Guid itemId, Guid callerUserId);
-        Task HideAsync(Guid itemId, Guid callerUserId);
-        Task ShowAsync(Guid itemId, Guid callerUserId);
-        Task<PagedResult<GalleryItemDto>> GetForRestaurantAsync(Guid restaurantId, int page = 1, int pageSize = 20);
+        Task<Guid> UploadAsync(UploadGalleryItemDto dto);
+        Task UpdateAsync(UpdateGalleryItemDto dto);
+        Task DeleteAsync(Guid itemId);
+        Task HideAsync(Guid itemId);
+        Task ShowAsync(Guid itemId);
+        Task<PagedResult<GalleryItemDto>> GetForRestaurantAsync(int page = 1, int pageSize = 20);
     }
 }

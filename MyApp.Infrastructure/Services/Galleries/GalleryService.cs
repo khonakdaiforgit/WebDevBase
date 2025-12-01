@@ -1,6 +1,5 @@
 ﻿using MyApp.Application.Abstractions.Galleries;
 using MyApp.Application.Abstractions.Galleries.Dtos;
-using MyApp.Application.Abstractions.Users;
 using MyApp.Application.Common;
 using MyApp.Domain.Entities;
 using MyApp.Infrastructure.Common;
@@ -11,23 +10,21 @@ namespace MyApp.Infrastructure.Services.Galleries
     public class GalleryService : IGalleryService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ICurrentUserService _currentUser;
 
-        public GalleryService(IUnitOfWork unitOfWork, ICurrentUserService currentUser)
+        public GalleryService(
+            IUnitOfWork unitOfWork
+            )
         {
             _unitOfWork = unitOfWork;
-            _currentUser = currentUser;
         }
 
-        public async Task<Guid> UploadAsync(UploadGalleryItemDto dto, Guid callerUserId)
+        public async Task<Guid> UploadAsync(UploadGalleryItemDto dto)
         {
-            await ValidateRestaurantAccessAsync(dto.RestaurantId, callerUserId);
 
             var galleryItem = new GalleryItem
             {
                 ImageUrl = dto.ImageUrl.Trim(),
                 Caption = dto.Caption?.Trim() ?? string.Empty,
-                RestaurantId = dto.RestaurantId,
                 UploadDate = DateTime.UtcNow,
                 IsVisible = true // default: visible on website
             };
@@ -38,12 +35,11 @@ namespace MyApp.Infrastructure.Services.Galleries
             return galleryItem.Id;
         }
 
-        public async Task UpdateAsync(UpdateGalleryItemDto dto, Guid callerUserId)
+        public async Task UpdateAsync(UpdateGalleryItemDto dto)
         {
             var item = await _unitOfWork.GalleryItems.GetByIdAsync(dto.Id)
                 ?? throw new NotFoundException("Gallery item not found.");
 
-            await ValidateRestaurantAccessAsync(item.RestaurantId, callerUserId);
 
             if (dto.Caption is not null)
                 item.Caption = dto.Caption.Trim();
@@ -51,27 +47,27 @@ namespace MyApp.Infrastructure.Services.Galleries
             if (dto.IsVisible.HasValue)
                 item.IsVisible = dto.IsVisible.Value;
 
+            if (dto.ImageUrl.Any())
+                item.ImageUrl = dto.ImageUrl;
+
             await _unitOfWork.GalleryItems.UpdateAsync(item);
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Guid itemId, Guid callerUserId)
+        public async Task DeleteAsync(Guid itemId)
         {
             var item = await _unitOfWork.GalleryItems.GetByIdAsync(itemId)
                 ?? throw new NotFoundException("Gallery item not found.");
 
-            await ValidateRestaurantAccessAsync(item.RestaurantId, callerUserId);
 
             await _unitOfWork.GalleryItems.DeleteAsync(itemId);
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task HideAsync(Guid itemId, Guid callerUserId)
+        public async Task HideAsync(Guid itemId)
         {
             var item = await _unitOfWork.GalleryItems.GetByIdAsync(itemId)
                 ?? throw new NotFoundException("Gallery item not found.");
-
-            await ValidateRestaurantAccessAsync(item.RestaurantId, callerUserId);
 
             item.IsVisible = false;
 
@@ -79,12 +75,11 @@ namespace MyApp.Infrastructure.Services.Galleries
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task ShowAsync(Guid itemId, Guid callerUserId)
+        public async Task ShowAsync(Guid itemId)
         {
             var item = await _unitOfWork.GalleryItems.GetByIdAsync(itemId)
                 ?? throw new NotFoundException("Gallery item not found.");
 
-            await ValidateRestaurantAccessAsync(item.RestaurantId, callerUserId);
 
             item.IsVisible = true;
 
@@ -93,11 +88,9 @@ namespace MyApp.Infrastructure.Services.Galleries
         }
 
         public async Task<PagedResult<GalleryItemDto>> GetForRestaurantAsync(
-            Guid restaurantId,
             int page = 1,
             int pageSize = 20)
         {
-            await ValidateRestaurantAccessAsync(restaurantId, _currentUser.UserId.Value);
 
             var pagedResult = await _unitOfWork.GalleryItems.GetPagedAsync(
                 page: page,
@@ -118,15 +111,5 @@ namespace MyApp.Infrastructure.Services.Galleries
                 pageSize);
         }
 
-        // Private helpers
-        private async Task ValidateRestaurantAccessAsync(Guid restaurantId, Guid userId)
-        {
-            var restaurant = await _unitOfWork.Restaurants.GetByIdAsync(restaurantId)
-                ?? throw new NotFoundException("Restaurant not found.");
-
-            // Single-restaurant system: all authenticated users have access
-            // Future: add ownership/role check
-            return;
-        }
     }
 }
