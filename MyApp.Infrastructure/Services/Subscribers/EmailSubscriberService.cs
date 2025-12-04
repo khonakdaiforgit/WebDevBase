@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using MyApp.Application.Abstractions.Subscribers;
 using MyApp.Application.Abstractions.Subscribers.Dtos;
 using MyApp.Application.Abstractions.Users;
@@ -48,6 +49,7 @@ public class EmailSubscriberService : IEmailSubscriberService
         await _unitOfWork.SaveChangesAsync();
     }
 
+    [AllowAnonymous]
     public async Task UnsubscribeAsync(string emailOrToken)
     {
         var subscriber = await _unitOfWork.EmailSubscribers.GetByUnsubscribeTokenAsync(emailOrToken)
@@ -61,7 +63,7 @@ public class EmailSubscriberService : IEmailSubscriberService
         await _unitOfWork.SaveChangesAsync();
     }
 
-
+    [AllowAnonymous]
     public async Task SubscribeAsync(string email)
     {
         var existing = await _unitOfWork.EmailSubscribers.GetByEmailAsync(email);
@@ -81,16 +83,16 @@ public class EmailSubscriberService : IEmailSubscriberService
         }
         else
         {
-            var callerId = _currentUser.UserId ?? throw new UnauthorizedAccessException();
-            var user = await _unitOfWork.Users.GetByIdAsync(callerId);
+          // send email Confirm Subscribe 
 
             var subscriber = new EmailSubscriber
             {
                 Email = email,
                 UnsubscribeToken = GenerateToken(),
-                IsActive = false
+                IsActive = true // false when send email
             };
             await _unitOfWork.EmailSubscribers.AddAsync(subscriber);
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 

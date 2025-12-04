@@ -1,0 +1,36 @@
+﻿@model MyApp.WebMVC.Views.Subscribers.ViewModels.ConfirmResultViewModel
+
+@{
+    ViewData["Title"] = Model.Success ? "Subscription Confirmed" : "Confirmation Failed";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // یا هر Layout عمومی که داری
+}
+
+<div class="container py-5 my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 text-center">
+            @if (Model.Success)
+            {
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                </div>
+                <h1 class="display-5 fw-bold text-success">Welcome aboard!</h1>
+                <p class="lead mt-4">@Model.Message</p>
+                <p>You'll start receiving our latest offers and updates soon.</p>
+            }
+            else
+            {
+                <div class="mb-4">
+                    <i class="fas fa-times-circle text-danger" style="font-size: 5rem;"></i>
+                </div>
+                <h1 class="display-5 fw-bold text-danger">Oops!</h1>
+                <p class="lead mt-4">@Model.Message</p>
+            }
+
+            <hr class="my-5">
+
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg">
+                <i class="fas fa-home"></i> Back to Website
+            </a>
+        </div>
+    </div>
+</div>

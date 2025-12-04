@@ -21,3 +21,6 @@
 9/29/2025
 	1- * Add host ip to NOPAYMNET
 	2- Contact Suport
+--------------
+12/4/2025
+	1- EmailSubscriberService

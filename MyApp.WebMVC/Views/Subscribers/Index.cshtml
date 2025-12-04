@@ -1,0 +1,114 @@
+﻿@* File: Views/Subscribers/Index.cshtml *@
+@model MyApp.WebMVC.Views.Subscribers.ViewModels.SubscriberListViewModel
+@{
+    ViewData["Title"] = "Newsletter Subscribers";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-envelope-open-text"></i> Newsletter Subscribers
+        </h1>
+        <div>
+            <a asp-action="Export" class="btn btn-success btn-sm">
+                <i class="fas fa-file-csv"></i> Export CSV
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                Active Subscribers (@Model.TotalCount)
+            </h6>
+            <small class="text-muted">Total registered emails</small>
+        </div>
+
+        <div class="card-body">
+            @if (!Model.Items.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No subscribers yet.</p>
+                    <p class="text-muted small">Add the newsletter form to your website to start collecting emails.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Email</th>
+                                <th>Subscribed On</th>
+                                <th>Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td><strong>@item.Email</strong></td>
+                                    <td>@item.SubscribedAt.ToString("MMM dd, yyyy - HH:mm")</td>
+                                    <td>
+                                        <span class="badge bg-@(item.IsActive ? "success" : "secondary")">
+                                            @(item.IsActive ? "Active" : "Inactive")
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <form asp-action="Remove" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="email" value="@item.Email" />
+                                            <button type="submit" class="btn btn-danger btn-sm"
+                                                    onclick="return confirm('Remove @item.Email from subscribers?')">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="Subscribers pagination">
+                        <ul class="pagination justify-content-center mt-4">
+                            <li class="page-item @(Model.HasPrevious ? "" : "disabled")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page - 1)">Previous</a>
+                            </li>
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.Page ? "active" : "")">
+                                    <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                                </li>
+                            }
+                            <li class="page-item @(Model.HasNext ? "" : "disabled")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page + 1)">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+        </div>
+    </div>
+</div>

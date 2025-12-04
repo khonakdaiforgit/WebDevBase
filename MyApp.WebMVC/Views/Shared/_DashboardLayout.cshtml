@@ -83,6 +83,18 @@
                 </a>
             </li>
 
+            <!-- Newsletter Subscribers -->
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Subscribers" ? "active" : "")">
+                <a class="nav-link" href="/Subscribers">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <span>Newsletter Subscribers</span>
+                    @if (ViewBag.SubscriberCount is int count && count > 0)
+                    {
+                        <span class="badge bg-primary rounded-pill ms-2">@count</span>
+                    }
+                </a>
+            </li>
+
             <!-- Restaurant (Dropdown Menu) -->
             <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Restaurant" ? "active" : "")">
                 <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseRestaurant"

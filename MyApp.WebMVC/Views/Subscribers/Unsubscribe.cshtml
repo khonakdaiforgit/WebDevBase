@@ -1,0 +1,36 @@
+﻿@model MyApp.WebMVC.Views.Subscribers.ViewModels.UnsubscribeResultViewModel
+
+@{
+    ViewData["Title"] = Model.Success ? "Unsubscribed" : "Unsubscribe Failed";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5 my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 text-center">
+            @if (Model.Success)
+            {
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                </div>
+                <h1 class="display-5 fw-bold">You've been unsubscribed</h1>
+                <p class="lead mt-4">@Model.Message</p>
+                <p class="text-muted">We're sad to see you go. You can resubscribe anytime.</p>
+            }
+            else
+            {
+                <div class="mb-4">
+                    <i class="fas fa-times-circle text-danger" style="font-size: 5rem;"></i>
+                </div>
+                <h1 class="display-5 fw-bold text-danger">Something went wrong</h1>
+                <p class="lead mt-4">@Model.Message</p>
+            }
+
+            <hr class="my-5">
+
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-home"></i> Return Home
+            </a>
+        </div>
+    </div>
+</div>

@@ -4,6 +4,7 @@ using MyApp.Application.Abstractions.Logging.Dtos;
 using MyApp.Application.Abstractions.Menus.Dtos;
 using MyApp.Application.Abstractions.Restaurants.Dtos;
 using MyApp.Application.Abstractions.Restaurants.Mapping;
+using MyApp.Application.Abstractions.Subscribers.Dtos;
 using MyApp.Application.Abstractions.Users.Dtos;
 using MyApp.Domain.Entities;
 using MyApp.Domain.ValueObjects;
@@ -34,6 +35,9 @@ namespace MyApp.Application
                 .ForMember(dest => dest.TodayHoursDisplay, opt => opt.MapFrom(src => src.WorkingHours.GetTodayHours()))
                 .ForMember(dest => dest.WorkingHours, opt => opt.MapFrom<WorkingHoursResolver<PublicRestaurantDto>>());
 
+            CreateMap<SubscriberDto, EmailSubscriber>()
+                .ForMember(dest => dest.UnsubscribeToken, opt => opt.Ignore())
+                .ReverseMap();
 
 
             //// Create DTO → Entity
