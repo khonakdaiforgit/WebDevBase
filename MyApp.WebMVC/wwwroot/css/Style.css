@@ -1,0 +1,77 @@
+﻿:root {
+    --primary: #485c81; /* رنگ اصلی برندت حالا آبی-خاکستری لوگو */
+    --primary-light: #647a9e;
+    --primary-dark: #374863;
+    --light: #ecf0f1;
+    --dark: #2c3e50;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--dark);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+}
+
+.hero {
+    background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.7)), url('/photos/B18I6807-crop-large.jpeg') center/cover no-repeat fixed;
+    min-height: 100vh;
+    color: white;
+}
+
+/* وقتی navbar شفافه → لوگو و متن‌ها سفید باشن تا دیده بشن */
+.navbar {
+    transition: all 0.4s ease;
+}
+
+    /* حالت اولیه (شفاف) */
+    .navbar .navbar-brand img {
+        filter: brightness(0) invert(1); /* لوگو رو سفید می‌کنه */
+        transition: filter 0.4s ease;
+    }
+
+    .navbar .nav-link,
+    .navbar .btn-outline-light {
+        color: white !important;
+        transition: all 0.3s;
+    }
+
+        .navbar .nav-link:hover {
+            color: var(--primary-light) !important;
+        }
+
+/* وقتی اسکرول شد و پس‌زمینه تیره شد */
+.navbar-scrolled {
+    background: rgba(68, 68, 68, 0.51) !important;
+    backdrop-filter: blur(12px);
+}
+
+    .navbar-scrolled .nav-link,
+    .navbar-scrolled .btn-outline-light {
+        color: white !important;
+    }
+
+        .navbar-scrolled .nav-link:hover {
+            color: #a0b4d3 !important;
+        }
+
+/* تنظیم اندازه لوگو در حالت‌های مختلف */
+.logo-img {
+    width: 100px;
+    height: auto;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .logo-img {
+        width: 80px;
+    }
+}
+
+@media (max-width: 576px) {
+    .logo-img {
+        width: 70px;
+    }
+}

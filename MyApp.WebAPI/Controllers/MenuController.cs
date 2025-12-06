@@ -25,7 +25,28 @@ namespace MyApp.WebAPI.Controllers
             _restaurantService = restaurantService;
         }
 
-        private Guid UserId => this.GetUserId();
+        [AllowAnonymous] // عمومی
+        [HttpGet("public")]
+        public async Task<ActionResult<IReadOnlyList<MenuCategoryDto>>> GetPublicMenu()
+        {
+            var categories = await _menuService.GetAllCategoriesWithItemsAsync();
+
+            var publicMenu = categories
+                .Select(c => new MenuCategoryDto(
+                    Id: c.Id,
+                    Name: c.Name,
+                    Order: c.Order,
+                    Items: c.Items
+                        .Where(i => i.IsAvailable)
+                        .OrderBy(i => i.Order)
+                        .ToList()
+                ))
+                .Where(c => c.Items.Any()) // دسته خالی نمایش داده نشه
+                .OrderBy(c => c.Order)
+                .ToList();
+
+            return Ok(publicMenu);
+        }
 
         // ====================== Category Endpoints ======================
 

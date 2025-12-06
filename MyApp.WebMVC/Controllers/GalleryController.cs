@@ -23,6 +23,33 @@ namespace MyApp.WebMVC.Controllers
         }
 
         private HttpClient Api() => _http.CreateClient("ApiClient").WithJwt(this);
+        private HttpClient PublicApi() => _http.CreateClient("ApiClient");
+        [AllowAnonymous]
+        public async Task<IActionResult> Show()
+        {
+            var response = await PublicApi().GetAsync("api/gallery/public");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                ViewBag.Error = "Gallery is temporarily unavailable.";
+                return View(new List<PublicGalleryItemViewModel>());
+            }
+
+            var items = await response.Content.ReadFromJsonAsync<List<GalleryItemDto>>();
+
+            var model = items?
+                .Where(x => x.IsVisible)
+                .Select(x => new PublicGalleryItemViewModel
+                {
+                    ImageUrl = x.ImageUrl,
+                    Caption = x.Caption ?? string.Empty,
+                    UploadDate = x.UploadDate.ToLocalTime()
+                })
+                .OrderByDescending(x => x.UploadDate)
+                .ToList() ?? new List<PublicGalleryItemViewModel>();
+
+            return View(model);
+        }
 
         // GET: /Gallery
         public async Task<IActionResult> Index()

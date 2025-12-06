@@ -1,0 +1,43 @@
+﻿@model List<MyApp.WebMVC.Views.Menu.ViewModels.PublicMenuCategoryViewModel>
+@{
+    ViewData["Title"] = "Menu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="py-5">
+    <div class="container">
+        <h1 class="text-center display-4 mb-5" data-aos="fade-up">Our Menu</h1>
+
+        @if (Model.Any())
+        {
+            @foreach (var category in Model)
+            {
+                <h2 class="mt-5 mb-4 border-bottom pb-3 text-primary" data-aos="fade-right">@category.Name</h2>
+                <div class="row g-4">
+                    @foreach (var item in category.Items)
+                    {
+                        <div class="col-md-6 col-lg-4" data-aos="zoom-in">
+                            <div class="card h-100 shadow-sm border-0 overflow-hidden">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="height:200px; object-fit:cover;">
+                                }
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title mb-2">@item.Name</h5>
+                                    <p class="card-text text-muted flex-grow-1 small">@item.Description</p>
+                                    <div class="mt-3">
+                                        <span class="h4 text-primary mb-0">$@item.Price.ToString("0.00")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-center text-muted fs-5">Menu is empty at the moment.</p>
+        }
+    </div>
+</section>

@@ -20,6 +20,21 @@ public class GalleryController : ControllerBase
         _galleryService = galleryService;
     }
 
+    // اضافه کن بالای کلاس یا داخلش
+    [AllowAnonymous] // مهم: این endpoint عمومی است
+    [HttpGet("public")]
+    public async Task<ActionResult<List<GalleryItemDto>>> GetPublicGallery()
+    {
+        // فقط تصاویر visible و مرتب شده بر اساس تاریخ
+        var result = await _galleryService.GetForRestaurantAsync(1, 1000);
+        var visibleItems = result.Items
+            .Where(x => x.IsVisible)
+            .OrderByDescending(x => x.UploadDate)
+            .ToList();
+
+        return Ok(visibleItems);
+    }
+
     /// <summary>
     /// آپلود تصویر جدید در گالری
     /// </summary>

@@ -25,6 +25,38 @@ namespace MyApp.WebMVC.Controllers
         }
 
         protected HttpClient Api() => _http.CreateClient("ApiClient").WithJwt(this);
+        protected HttpClient PublicApi() => _http.CreateClient("ApiClient");
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Show()
+        {
+            var response = await PublicApi().GetAsync("api/menu/public");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                ViewBag.Error = "Menu is temporarily unavailable.";
+                return View(new List<PublicMenuCategoryViewModel>());
+            }
+
+            var categories = await response.Content.ReadFromJsonAsync<List<MenuCategoryDto>>();
+
+            var model = categories?
+                .Select(c => new PublicMenuCategoryViewModel
+                {
+                    Name = c.Name,
+                    Items = c.Items.Select(i => new PublicMenuItemViewModel
+                    {
+                        Name = i.Name,
+                        Description = i.Description ?? string.Empty,
+                        Price = i.Price,
+                        ImageUrl = i.ImageUrl ?? string.Empty
+                    }).ToList()
+                })
+                .Where(c => c.Items.Any())
+                .ToList() ?? new List<PublicMenuCategoryViewModel>();
+
+            return View(model);
+        }
 
         // GET: /Menu/Index
         public async Task<IActionResult> Index()
