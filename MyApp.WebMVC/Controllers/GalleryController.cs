@@ -24,6 +24,7 @@ namespace MyApp.WebMVC.Controllers
 
         private HttpClient Api() => _http.CreateClient("ApiClient").WithJwt(this);
         private HttpClient PublicApi() => _http.CreateClient("ApiClient");
+
         [AllowAnonymous]
         public async Task<IActionResult> Show()
         {
