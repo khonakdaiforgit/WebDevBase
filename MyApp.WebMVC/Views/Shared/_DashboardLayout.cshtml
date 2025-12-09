@@ -114,6 +114,15 @@
                 </div>
             </li>
 
+            <!-- Contact Messages -->
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ContactMessages" ? "active" : "")">
+                <a class="nav-link" href="/ContactMessages">
+                    <i class="fas fa-envelope"></i>
+                    <span>Contact Messages</span>
+                    @await Component.InvokeAsync("UnreadContactMessages")
+                </a>
+            </li>
+
             <!-- Logs -->
             <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Logs" ? "active" : "")">
                 <a class="nav-link" href="/Logs">

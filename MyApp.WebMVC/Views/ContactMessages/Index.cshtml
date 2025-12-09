@@ -1,0 +1,113 @@
+﻿@model MyApp.WebMVC.Views.ContactMessages.ViewModels.ContactMessagesIndexViewModel
+@{
+    ViewData["Title"] = "Contact Messages";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-chat-dots"></i> Contact Messages (@Model.TotalCount)</h2>
+
+    <div>
+        <a asp-action="Index" asp-route-onlyUnread="true"
+           class="btn @(Model.OnlyUnread == true ? "btn-warning" : "btn-outline-warning")">
+            <i class="bi bi-envelope"></i> Unread Only
+        </a>
+        <a asp-action="Index" asp-route-onlyUnread="false"
+           class="btn @(Model.OnlyUnread == false ? "btn-secondary" : "btn-outline-secondary")">
+            <i class="bi bi-list-ul"></i> All Messages
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!Model.Messages.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <p class="lead text-muted mt-3">No messages found.</p>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th>From</th>
+                    <th>Email</th>
+                    <th>Message</th>
+                    <th>Status</th>
+                    <th width="100">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var msg in Model.Messages)
+                {
+                    <tr class="@(!msg.IsRead ? "table-warning fw-bold" : "")">
+                        <td class="small text-muted">@msg.SentAtDisplay</td>
+                        <td>@msg.Name</td>
+                        <td>
+                            <a href="mailto:@msg.Email" class="text-decoration-none">
+                                @msg.Email
+                            </a>
+                        </td>
+                        <td>@msg.ShortMessage</td>
+                        <td>
+                            <span class="badge @msg.StatusClass">
+                                @msg.StatusBadge
+                            </span>
+                        </td>
+                        <td>
+                            @if (!msg.IsRead)
+                            {
+                                <form asp-action="MarkAsRead" asp-route-id="@msg.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-check-lg"></i> Mark Read
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-success small"><i class="bi bi-check2-all"></i> Read</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(Model.HasPrevious ? "" : "disabled")">
+                <a class="page-link" asp-action="Index"
+                   asp-route-page="@(Model.CurrentPage - 1)"
+                   asp-route-onlyUnread="@Model.OnlyUnread">Previous</a>
+            </li>
+
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-onlyUnread="@Model.OnlyUnread">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(Model.HasNext ? "" : "disabled")">
+                <a class="page-link" asp-action="Index"
+                   asp-route-page="@(Model.CurrentPage + 1)"
+                   asp-route-onlyUnread="@Model.OnlyUnread">Next</a>
+            </li>
+        </ul>
+    </nav>
+}

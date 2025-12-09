@@ -5,10 +5,9 @@ namespace MyApp.WebMVC.Extensions;
 
 public static class HttpClientExtensions
 {
-    /// <summary>
-    /// خودکار Bearer Token رو از HttpContext (Items یا Cookie) می‌گیره و ست می‌کنه
-    /// </summary>
-    private static HttpClient WithJwt(this HttpClient client, HttpContext context)
+
+
+    private static HttpClient AddJwtToken(this HttpClient client, HttpContext context)
     {
         var token = context.Items["__LatestAccessToken"] as string
                     ?? context.Request.Cookies["access_token"];
@@ -21,9 +20,9 @@ public static class HttpClientExtensions
         return client;
     }
 
-    /// <summary>
-    /// نسخه کوتاه‌تر برای استفاده در کنترلر (this Controller)
-    /// </summary>
     public static HttpClient WithJwt(this HttpClient client, Controller controller)
-        => client.WithJwt(controller.HttpContext);
+        => client.AddJwtToken(controller.HttpContext);
+
+    public static HttpClient WithJwt(this HttpClient client, HttpContext context)
+            => client.AddJwtToken(context); // مستقیم از متد private استفاده می‌کنه
 }

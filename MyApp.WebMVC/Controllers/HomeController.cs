@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Abstractions.Restaurants.Dtos;
 using MyApp.WebMVC.Views.Home.ViewModels;
+using System.Text;
+using System.Text.Json;
 
 namespace MyApp.WebMVC.Controllers
 {
@@ -31,9 +33,53 @@ namespace MyApp.WebMVC.Controllers
             return View(viewModel);
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> Contact()
+        {
+            var dto = await Api().GetFromJsonAsync<PublicRestaurantDto>("api/public/info");
+
+            var restaurantInfo = dto is not null
+                ? _mapper.Map<HomeIndexViewModel>(dto)
+                : new HomeIndexViewModel { RestaurantName = "Pearl" };
+
+            ViewBag.rsturantInfo= restaurantInfo;
+
+            return View(new ContactViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Contact(ContactViewModel model)
+        {
+            var request = new 
+            {
+                name = model.Name?.Trim(),
+                email = model.Email?.Trim(),
+                message = model.Message?.Trim()
+            };
+
+            var json = JsonSerializer.Serialize(request);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await Api().PostAsync("api/contact-messages/public/submit", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["ContactSuccess"] = "Thank you! Your message has been sent successfully. We'll get back to you soon.";
+                return RedirectToAction("Contact");
+            }
+            else
+            {
+                TempData["ContactError"] = "Oops! Something went wrong. Please try again later or email us directly.";
+                return View(model);
+            }
+        }
+
         public IActionResult Privacy()
         {
             return View();
         }
+
     }
 }

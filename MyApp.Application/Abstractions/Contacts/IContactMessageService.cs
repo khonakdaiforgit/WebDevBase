@@ -8,5 +8,7 @@ namespace MyApp.Application.Abstractions.Contacts
         Task<Guid> SubmitAsync(string name, string email, string message);
         Task MarkAsReadAsync(Guid messageId);
         Task<PagedResult<ContactMessageDto>> GetListAsync(bool? onlyUnread = null, int page = 1, int pageSize = 20);
+
+        Task<int> GetUnreadCountAsync();
     }
 }

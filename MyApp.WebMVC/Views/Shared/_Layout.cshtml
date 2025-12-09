@@ -42,7 +42,9 @@
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Gallery" asp-action="Show">Gallery</a>
                     </li>
-                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="Contact">Contact</a>
+                    </li>
 
                     @if (User.Identity?.IsAuthenticated == true)
                     {

@@ -19,6 +19,12 @@ namespace MyApp.Infrastructure.Services.Contacts
             _currentUser = currentUser;
         }
 
+        // فایل: ContactMessageService.cs
+        public async Task<int> GetUnreadCountAsync()
+        {
+            return await _unitOfWork.ContactMessages
+                .CountAsync(m => !m.IsRead);
+        }
         /// <summary>
         /// Submit a new contact message from the public website
         /// </summary>
