@@ -1,0 +1,120 @@
+﻿@model MyApp.WebMVC.Views.News.ViewModels.UpdateNewsViewModel
+@{
+    ViewData["Title"] = "Edit News";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Edit News</h1>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to News
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ImageUrl" /> <!-- برای نگه داشتن URL فعلی -->
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-edit"></i> Update News Article
+                </h6>
+                <small class="text-muted">Modify the article details</small>
+            </div>
+
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label">Title</label>
+                    <input asp-for="Title" class="form-control" required />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+
+                <div class="mb-3">
+                    <label asp-for="Content" class="form-label">Content</label>
+                    <!-- TinyMCE Editor -->
+                    <textarea asp-for="Content" id="tinymce-editor" class="form-control" rows="15">
+                        @Html.Raw(Model?.Content ?? "")  <!-- برای Edit مقدار فعلی رو نشون بده -->
+                    </textarea>
+                    <span asp-validation-for="Content" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ImageFile" class="form-label">Image</label>
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="Current Image" class="img-thumbnail mb-2" style="max-height: 200px;" />
+                    }
+                    <input asp-for="ImageFile" type="file" class="form-control" accept="image/jpeg,image/png,image/webp" />
+                    <div class="form-text">Upload a new image to replace the current one (optional)</div>
+                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input asp-for="IsPublished" type="checkbox" class="form-check-input" />
+                    <label asp-for="IsPublished" class="form-check-label">Published</label>
+                    <div class="form-text">Check to publish immediately</div>
+                </div>
+            </div>
+
+            <div class="card-footer text-center bg-light">
+                <button type="submit" class="btn btn-lg btn-primary px-5">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+
+    <!-- بارگذاری TinyMCE از CDN -->
+    <script src="https://cdn.tiny.cloud/1/eyhnyzw1jyb5el10q38v15w4sochcnurvn94csyk41vihrmq/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
+
+    <script>
+        tinymce.init({
+            selector: '#tinymce-editor',
+            height: 500,
+            menubar: false,  // منوبار بالا رو مخفی کن (ساده‌تر بشه)
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+                'preview', 'anchor', 'searchreplace', 'visualblocks',
+                'code', 'fullscreen', 'insertdatetime', 'media',
+                'table', 'code', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | blocks | bold italic underline strikethrough | ' +
+                     'alignleft aligncenter alignright alignjustify | ' +
+                     'bullist numlist outdent indent | link | ' +
+                     'removeformat | fullscreen preview | help',
+            content_style: 'body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif; font-size:14px }',
+
+            // تنظیمات ساده برای آپلود تصویر (اختیاری - اگر بخوای مستقیم آپلود کنی)
+            // images_upload_url: '/api/upload/tinymce',  // اگر بخوای آپلود مستقیم داشته باشی بعداً اضافه کن
+            // images_upload_credentials: true,
+
+            branding: false,
+            language: 'en',  // اگر بخوای فارسی کنی 'fa' بذار (نیاز به فایل زبان داره)
+            placeholder: 'Write the news content here...'
+        });
+    </script>
+}

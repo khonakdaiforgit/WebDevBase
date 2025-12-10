@@ -1,6 +1,5 @@
 ﻿using MyApp.Application.Abstractions.News;
 using MyApp.Application.Abstractions.News.Dtos;
-using MyApp.Application.Abstractions.Users;
 using MyApp.Application.Common;
 using MyApp.Infrastructure.Common;
 using MyApp.Infrastructure.Common.Exceptions;
@@ -11,12 +10,10 @@ namespace MyApp.Infrastructure.Services.News
     public class NewsService : INewsService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ICurrentUserService _currentUser;
 
-        public NewsService(IUnitOfWork unitOfWork, ICurrentUserService currentUser)
+        public NewsService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _currentUser = currentUser;
         }
 
         public async Task<Guid> CreateAsync(CreateNewsDto dto)
@@ -106,9 +103,9 @@ namespace MyApp.Infrastructure.Services.News
                 news.IsPublished);
         }
 
-        public async Task<PagedResult<NewsListItemDto>> GetListAsync( int page = 1, int pageSize = 20)
+        public async Task<PagedResult<NewsListItemDto>> GetListAsync(int page = 1, int pageSize = 20)
         {
-     
+
 
             var paged = await _unitOfWork.News.GetPagedByRestaurantAsync(
                 onlyPublished: null, // return both published & draft for admin panel
@@ -119,28 +116,11 @@ namespace MyApp.Infrastructure.Services.News
                 n.Id,
                 n.Title,
                 n.ImageUrl,
+                n.Content,
                 n.PublishDate,
                 n.IsPublished)).ToList();
 
             return new PagedResult<NewsListItemDto>(dtos, paged.TotalCount, page, pageSize);
-        }
-
-        // Private helpers
-        private async Task ValidateRestaurantAccessAsync(Guid restaurantId, Guid userId)
-        {
-            var restaurant = await _unitOfWork.Restaurants.GetByIdAsync(restaurantId)
-                ?? throw new NotFoundException("Restaurant not found.");
-
-            // In current single-restaurant system, every authenticated user has access
-            // Future enhancement: check restaurant.OwnerId == userId or user.Role == Admin
-            return;
-        }
-
-        private async Task<Guid> GetCurrentUserRestaurantIdAsync()
-        {
-            var restaurants = await _unitOfWork.Restaurants.GetAllAsync();
-            return restaurants.FirstOrDefault()?.Id
-                ?? throw new InvalidOperationException("No restaurant registered in the system.");
         }
     }
 }

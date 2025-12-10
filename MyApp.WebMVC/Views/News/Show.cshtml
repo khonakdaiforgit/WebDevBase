@@ -1,0 +1,54 @@
+﻿@model MyApp.WebMVC.Views.News.ViewModels.NewsPublicViewModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="page">
+
+    <!-- Optional: Alert for admin preview (if the news is not published yet) -->
+    @if (User.Identity?.IsAuthenticated == true && !Model.IsPublished)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-eye-slash me-2"></i>
+            <strong>Preview Mode:</strong> This news article is not published yet and is visible only to you (admin).
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+
+                <!-- Featured Image -->
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <div class="mb-4">
+                        <img src="@Model.ImageUrl" class="img-fluid rounded shadow" alt="@Model.Title" style="width: 100%; max-height: 500px; object-fit: cover;">
+                    </div>
+                }
+
+                <!-- Title & Meta -->
+                <header class="mb-5 text-center">
+                    <h1 class="display-4 fw-bold text-primary">@Model.Title</h1>
+                    <div class="text-muted mt-3">
+                        <i class="far fa-calendar-alt me-2"></i>
+                        @Model.PublishDate.ToString("MMMM dd, yyyy")
+                    </div>
+                </header>
+
+                <!-- Content (rendered as HTML from TinyMCE) -->
+                <article class="news-content lh-lg fs-5">
+                    @Html.Raw(Model.Content)
+                </article>
+
+                <!-- Back to News List Button (optional) -->
+                <div class="mt-5 text-center">
+                    <a asp-controller="News" asp-action="AllNews" class="btn btn-sm btn-outline-primary btn-lg">
+                        <i class="fas fa-arrow-left me-2"></i> Back to News
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>

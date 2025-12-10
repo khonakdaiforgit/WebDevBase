@@ -4,6 +4,7 @@ namespace MyApp.Application.Abstractions.News.Dtos
         Guid Id,
         string Title,
         string ImageUrl,
+        string Content,
         DateTime PublishDate,
         bool IsPublished);
 }
