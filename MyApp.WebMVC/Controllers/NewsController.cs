@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Abstractions.News.Dtos;
 using MyApp.Domain.Entities;
+using MyApp.WebMVC.Controllers.Base;
 using MyApp.WebMVC.Extensions;
 using MyApp.WebMVC.Views.News.ViewModels;
 using System.Text.RegularExpressions;
@@ -11,12 +12,12 @@ using System.Text.RegularExpressions;
 namespace MyApp.WebMVC.Controllers
 {
     [Authorize]
-    public class NewsController : Controller
+    public class NewsController : BaseController
     {
         private readonly IHttpClientFactory _http;
         private readonly IMapper _mapper;
 
-        public NewsController(IHttpClientFactory http, IMapper mapper)
+        public NewsController(IHttpClientFactory http, IMapper mapper) : base(http)
         {
             _http = http;
             _mapper = mapper;
@@ -61,8 +62,8 @@ namespace MyApp.WebMVC.Controllers
                     Title = dto.Title,
                     ImageUrl = dto.ImageUrl ?? string.Empty,
                     PublishDate = dto.PublishDate,
-                    Summary = dto.Content.Length > 150
-                        ? System.Net.WebUtility.HtmlDecode(Regex.Replace(dto.Content, "<.*?>", string.Empty)).Substring(0, 200) + "..."
+                    Summary = System.Net.WebUtility.HtmlDecode(Regex.Replace(dto.Content, "<.*?>", string.Empty)).Length > 150
+                        ? System.Net.WebUtility.HtmlDecode(Regex.Replace(dto.Content, "<.*?>", string.Empty)).Substring(0, 150) + "..."
                         : System.Net.WebUtility.HtmlDecode(Regex.Replace(dto.Content, "<.*?>", string.Empty))
                 })
                 .ToList();

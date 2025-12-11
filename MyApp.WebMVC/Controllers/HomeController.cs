@@ -1,20 +1,21 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Abstractions.Restaurants.Dtos;
+using MyApp.WebMVC.Controllers.Base;
 using MyApp.WebMVC.Views.Home.ViewModels;
 using System.Text;
 using System.Text.Json;
 
 namespace MyApp.WebMVC.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly IHttpClientFactory _http;
         private readonly IMapper _mapper;
 
         public HomeController(
             IHttpClientFactory clientFactory,
-            IMapper mapper)
+            IMapper mapper) : base(clientFactory)
         {
             _http = clientFactory;
             _mapper = mapper;   
@@ -24,7 +25,8 @@ namespace MyApp.WebMVC.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var dto = await Api().GetFromJsonAsync<PublicRestaurantDto>("api/public/info");
+            
+            var dto = await PublicApi().GetFromJsonAsync<PublicRestaurantDto>("api/public/info");
 
             var viewModel = dto is not null
                 ? _mapper.Map<HomeIndexViewModel>(dto)
@@ -35,15 +37,15 @@ namespace MyApp.WebMVC.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> Contact()
+        public IActionResult Contact()
         {
-            var dto = await Api().GetFromJsonAsync<PublicRestaurantDto>("api/public/info");
+            //var dto = await PublicApi().GetFromJsonAsync<PublicRestaurantDto>("api/public/info");
 
-            var restaurantInfo = dto is not null
-                ? _mapper.Map<HomeIndexViewModel>(dto)
-                : new HomeIndexViewModel { RestaurantName = "Pearl" };
+            //var restaurantInfo = dto is not null
+            //    ? _mapper.Map<HomeIndexViewModel>(dto)
+            //    : new HomeIndexViewModel { RestaurantName = "Pearl" };
 
-            ViewBag.rsturantInfo= restaurantInfo;
+            //ViewBag.rsturantInfo= restaurantInfo;
 
             return View(new ContactViewModel());
         }
@@ -62,7 +64,7 @@ namespace MyApp.WebMVC.Controllers
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await Api().PostAsync("api/contact-messages/public/submit", content);
+            var response = await PublicApi().PostAsync("api/contact-messages/public/submit", content);
 
             if (response.IsSuccessStatusCode)
             {

@@ -1,82 +1,157 @@
-﻿@using MyApp.WebMVC.Views.Home.ViewModels
-@model MyApp.WebMVC.Views.Home.ViewModels.ContactViewModel
-@{
-    var restaurantInfo = ViewBag.rsturantInfo as HomeIndexViewModel;
+﻿@using MyApp.WebMVC.Views.Shared.ViewModels
+@using MyApp.WebMVC.Views.Home.ViewModels
 
-    ViewData["Title"] = "Contact Us - " + restaurantInfo.RestaurantName;
+@model ContactViewModel
+
+@{
+    var layoutData = ViewData["LayoutData"] as SharedLayoutViewModel
+                    ?? new SharedLayoutViewModel();
+
+    ViewData["Title"] = "Contact Us - " + layoutData.RestaurantName;
 }
 
-<div class="container py-5 page">
-    <div class="row">
-        <!-- اطلاعات تماس -->
-        <div class="col-lg-5 mb-5">
-            <h1 class="mb-4">Get in Touch</h1>
-            <p class="lead">We'd love to hear from you! Whether you have a question, feedback, or just want to say hi.</p>
+<div class="container-fluid px-0">
+    <!-- نقشه بزرگ تمام‌عرض -->
+    @if (layoutData.Latitude != 0 && layoutData.Longitude != 0)
+    {
 
-            <div class="mt-5">
-                <h5><i class="bi bi-geo-alt-fill text-primary"></i> Address</h5>
-                <p>@restaurantInfo.Address</p>
+        <iframe width="100%"
+                height="500vh"
+                frameborder="0"
+                style="border:0;"
+                allowfullscreen
+                src="https://www.google.com/maps?q=@layoutData.Latitude,@layoutData.Longitude&hl=en&z=16&output=embed">
+        </iframe>
 
-                <h5 class="mt-4"><i class="bi bi-telephone-fill text-primary"></i> Phone</h5>
-                <p><a href="tel:@restaurantInfo.Phone">@restaurantInfo.Phone</a></p>
+        <!-- دکمه کوچک باز کردن در گوگل مپ (اختیاری، روی نقشه) -->
+        <div class="text-center mt-3 mb-5">
+            <a href="https://www.google.com/maps/search/?api=1&query=@layoutData.Latitude,@layoutData.Longitude"
+               target="_blank"
+               class="btn btn-outline-primary btn-lg d-inline-flex align-items-center gap-2">
+                <i class="fas fa-external-link-alt"></i> Open in Google Maps
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center py-5 mb-5">
+            <i class="fas fa-map-marked-alt fa-3x mb-3"></i>
+            <p class="lead">Location map will be displayed here once coordinates are configured.</p>
+        </div>
+    }
+</div>
 
-                <h5 class="mt-4"><i class="bi bi-envelope-fill text-primary"></i> Email</h5>
-                <p><a href="mailto:@Model.Email">@Model.Email</a></p>
+<div class="container py-5">
+    <div class="row g-5">
+        <!-- بخش چپ: اطلاعات تماس -->
+        <div class="col-lg-4">
+            <h2 class="mb-4 fw-bold">Get in Touch</h2>
+            <p class="lead text-muted">We'd love to hear from you! Questions, feedback, or reservations — we're here to help.</p>
+
+            <div class="mt-5 p-4 bg-light rounded-4 shadow-sm">
+                <h5 class="fw-semibold"><i class="fas fa-map-marker-alt text-primary me-2"></i> Address</h5>
+                <p class="mb-3">@layoutData.FullAddress</p>
+
+                <h5 class="fw-semibold mt-4"><i class="fas fa-phone text-primary me-2"></i> Phone</h5>
+                <p><a href="tel:@layoutData.Phone.Replace(" ", "")" class="text-decoration-none">@layoutData.Phone</a></p>
+
+                <h5 class="fw-semibold mt-4"><i class="fas fa-envelope text-primary me-2"></i> Email</h5>
+                <p><a href="mailto:@layoutData.Email" class="text-decoration-none">@layoutData.Email</a></p>
+
+                <h5 class="fw-semibold mt-4"><i class="fas fa-clock text-primary me-2"></i> Today's Hours</h5>
+                <p class="mb-0">
+                    @layoutData.TodayHoursDisplay
+                    @if (layoutData.IsOpenNow)
+                    {
+                        <span class="badge bg-success ms-2">Open Now</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger ms-2">Closed</span>
+                    }
+                </p>
             </div>
         </div>
 
-        <!-- فرم تماس -->
-        <div class="col-lg-7">
+        <!-- بخش راست: فرم تماس -->
+        <div class="col-lg-8">
             @if (TempData["ContactSuccess"] is string success)
             {
-                <div class="alert alert-success alert-dismissible fade show">
-                    <strong>Success!</strong> @success
+                <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm">
+                    <i class="fas fa-check-circle me-2"></i> <strong>Thank you!</strong> @success
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }
 
             @if (TempData["ContactError"] is string error)
             {
-                <div class="alert alert-danger alert-dismissible fade show">
-                    <strong>Error!</strong> @error
+                <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm">
+                    <i class="fas fa-exclamation-triangle me-2"></i> <strong>Oops!</strong> @error
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }
 
-            <div class="card shadow-sm">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-primary text-white text-center py-5">
+                    <h3 class="mb-0 fw-light">Send us a Message</h3>
+                </div>
                 <div class="card-body p-5">
-                    <h3 class="card-title mb-4">Send us a Message</h3>
-
                     <form asp-action="Contact" method="post">
                         @Html.AntiForgeryToken()
 
-                        <div class="mb-3">
-                            <label asp-for="Name" class="form-label">Your Name</label>
-                            <input asp-for="Name" class="form-control form-control-lg" placeholder="John Doe" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label asp-for="Name" class="form-label fw-medium">Your Name</label>
+                                <input asp-for="Name" class="form-control form-control-lg rounded-3" placeholder="John Doe" />
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label fw-medium">Email Address</label>
+                                <input asp-for="Email" class="form-control form-control-lg rounded-3" placeholder="john@example.com" />
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label">Email Address</label>
-                            <input asp-for="Email" class="form-control form-control-lg" placeholder="john@example.com" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
+                        <div class="mt-4">
+                            <label asp-for="Message" class="form-label fw-medium">Your Message</label>
+                            <textarea asp-for="Message" class="form-control rounded-3" rows="8" placeholder="Hi there! I'd love to know more about..."></textarea>
+                            <span asp-validation-for="Message" class="text-danger small"></span>
                         </div>
 
-                        <div class="mb-4">
-                            <label asp-for="Message" class="form-label">Your Message</label>
-                            <textarea asp-for="Message" class="form-control" rows="6" placeholder="Hi there! I wanted to ask about..."></textarea>
-                            <span asp-validation-for="Message" class="text-danger"></span>
+                        <div class="mt-5 text-end">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-3 shadow-sm d-inline-flex align-items-center gap-2">
+                                <i class="fas fa-paper-plane"></i> Send Message
+                            </button>
                         </div>
-
-                        <button type="submit" class="btn btn-primary btn-lg px-5">
-                            <i class="bi bi-send"></i> Send Message
-                        </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .map-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+    }
+
+        .map-container iframe {
+            display: block;
+            border-radius: 0.75rem;
+            margin: 0 auto;
+            max-width: 1400px;
+        }
+    @@media (max-width: 768px) {
+        .map-container iframe
+
+    {
+        height: 350px !important;
+    }
+
+    }
+</style>
 
 @section Scripts {
     @{

@@ -1,0 +1,41 @@
+﻿@model MyApp.WebMVC.Views.Newsletter.ViewModels.NewsletterDetailsViewModel
+@{
+    ViewData["Title"] = "Newsletter Details";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Newsletter Details</h1>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Newsletters
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">@Model.Subject</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9">
+                    <span class="badge @(Model.Status == NewsletterStatus.Sent ? "bg-success" : (Model.Status == NewsletterStatus.Draft ? "bg-warning text-dark" : "bg-secondary"))">
+                        @Model.Status
+                    </span>
+                </dd>
+
+                <dt class="col-sm-3">Sent At</dt>
+                <dd class="col-sm-9">@(Model.SentAt?.ToString("MMM dd, yyyy HH:mm") ?? "Not Sent")</dd>
+
+                <dt class="col-sm-3">Sent By</dt>
+                <dd class="col-sm-9">@Model.SentByUserId</dd>
+
+                <dt class="col-sm-3">Content</dt>
+                <dd class="col-sm-9">
+                    <div class="border p-3 bg-light">@Html.Raw(Model.Content)</div>
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div>

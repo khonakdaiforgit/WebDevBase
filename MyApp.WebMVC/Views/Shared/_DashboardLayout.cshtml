@@ -83,16 +83,29 @@
                 </a>
             </li>
 
-            <!-- Newsletter Subscribers -->
-            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Subscribers" ? "active" : "")">
-                <a class="nav-link" href="/Subscribers">
+            <!-- Newsletter & Subscribers (Dropdown Menu) -->
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() is "Newsletter" or "Subscribers" ? "active" : "")">
+                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseNewsletter"
+                   aria-expanded="false" aria-controls="collapseNewsletter">
                     <i class="fas fa-envelope-open-text"></i>
-                    <span>Newsletter Subscribers</span>
-                    @if (ViewBag.SubscriberCount is int count && count > 0)
-                    {
-                        <span class="badge bg-primary rounded-pill ms-2">@count</span>
-                    }
+                    <span>Newsletter</span>
                 </a>
+                <div id="collapseNewsletter" class="collapse @(ViewContext.RouteData.Values["controller"]?.ToString() is "Newsletter" or "Subscribers" ? "show" : "")"
+                     aria-labelledby="headingNewsletter" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Newsletter Management:</h6>
+
+                        <a class="collapse-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Newsletter" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
+                           href="/Newsletter">
+                            <i class="fas fa-envelope me-2"></i> Campaigns
+                        </a>
+
+                        <a class="collapse-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Subscribers" ? "active" : "")"
+                           href="/Subscribers">
+                            <i class="fas fa-users me-2"></i> Subscribers
+                        </a>
+                    </div>
+                </div>
             </li>
 
             <!-- Restaurant (Dropdown Menu) -->
@@ -120,14 +133,6 @@
                     <i class="fas fa-envelope"></i>
                     <span>Contact Messages</span>
                     @await Component.InvokeAsync("UnreadContactMessages")
-                </a>
-            </li>
-
-            <!-- Logs -->
-            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Logs" ? "active" : "")">
-                <a class="nav-link" href="/Logs">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Logs & Analytics</span>
                 </a>
             </li>
 

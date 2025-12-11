@@ -3,10 +3,10 @@
     ViewData["Title"] = "News & Events";
 }
 <section class="page">
-    <div class="container py-5">
+    <div class="container">
         <div class="row">
             <div class="col-12 text-center mb-5">
-                <h1 class="display-4 fw-bold text-primary">News & Events</h1>
+                <h1 class="display-4">News & Events</h1>
                 <p class="lead text-muted">Stay updated with the latest happenings at our restaurant</p>
             </div>
         </div>
@@ -48,18 +48,18 @@
                 <nav aria-label="News pagination" class="mt-5">
                     <ul class="pagination justify-content-center">
                         <li class="page-item @(Model.Pagination.HasPrevious ? "" : "disabled")">
-                            <a class="page-link" asp-action="Index" asp-route-page="@(Model.Pagination.CurrentPage - 1)" tabindex="-1">Previous</a>
+                            <a class="page-link" asp-action="AllNews" asp-route-page="@(Model.Pagination.CurrentPage - 1)" tabindex="-1">Previous</a>
                         </li>
 
                         @for (int i = 1; i <= Model.Pagination.TotalPages; i++)
                         {
                             <li class="page-item @(i == Model.Pagination.CurrentPage ? "active" : "")">
-                                <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                                <a class="page-link" asp-action="AllNews" asp-route-page="@i">@i</a>
                             </li>
                         }
 
                         <li class="page-item @(Model.Pagination.HasNext ? "" : "disabled")">
-                            <a class="page-link" asp-action="Index" asp-route-page="@(Model.Pagination.CurrentPage + 1)">Next</a>
+                            <a class="page-link" asp-action="AllNews" asp-route-page="@(Model.Pagination.CurrentPage + 1)">Next</a>
                         </li>
                     </ul>
                 </nav>

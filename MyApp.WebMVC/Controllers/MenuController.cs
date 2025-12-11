@@ -2,30 +2,29 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Abstractions.Menus.Dtos;
-using MyApp.WebMVC.Extensions; // برای WithJwt
+using MyApp.WebMVC.Controllers.Base;
+using MyApp.WebMVC.Extensions;
 using MyApp.WebMVC.Views.Menu.ViewModels;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace MyApp.WebMVC.Controllers
 {
     [Authorize]
-    public class MenuController : Controller
+    public class MenuController : BaseController
     {
         private readonly IHttpClientFactory _http;
         private readonly IMapper _mapper;
 
-        public MenuController(IHttpClientFactory http, IMapper mapper)
+        public MenuController(
+            IHttpClientFactory clientFactory,
+            IMapper mapper) : base(clientFactory)
         {
-            _http = http;
+            _http = clientFactory;
             _mapper = mapper;
         }
 
         protected HttpClient Api() => _http.CreateClient("ApiClient").WithJwt(this);
-        protected HttpClient PublicApi() => _http.CreateClient("ApiClient");
 
         [AllowAnonymous]
         public async Task<IActionResult> Show()
@@ -84,7 +83,7 @@ namespace MyApp.WebMVC.Controllers
                         Price = itemDto.Price,
                         ImageUrl = itemDto.ImageUrl ?? string.Empty,
                         IsAvailable = itemDto.IsAvailable,
-                        Order=itemDto.Order
+                        Order = itemDto.Order
                     }).ToList() ?? new List<MenuItemViewModel>()
                 })
                 .OrderBy(c => c.Order).ToList()
@@ -219,7 +218,7 @@ namespace MyApp.WebMVC.Controllers
             // اگر عکس آپلود شده، اول به Cloudinary بفرست (مثل UploadLogo)
             if (model.ImageFile != null && model.ImageFile.Length > 0)
             {
-                model.ImageUrl = await model.ImageFile.UploadImageAsync("menu-items"); 
+                model.ImageUrl = await model.ImageFile.UploadImageAsync("menu-items");
                 if (string.IsNullOrEmpty(model.ImageUrl))
                 {
                     TempData["Error"] = "Image upload failed.";

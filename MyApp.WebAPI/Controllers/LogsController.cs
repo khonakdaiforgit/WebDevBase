@@ -21,6 +21,17 @@ namespace MyApp.WebAPI.Controllers
             _authz = authz;
         }
 
+        [HttpPost]
+        public async Task<IActionResult> PostLog([FromBody] LogEntryDto logDto)
+        {
+            //var callerId = this.GetUserId();
+            //if (!await _authz.CanLogAsync(callerId)) // اگر نیاز به مجوز داری
+            //    return Forbid();
+
+            await _logService.LogAsync(logDto);
+            return Ok();
+        }
+
         [HttpGet]
         public async Task<ActionResult<PagedResult<LogEntryDto>>> Get(
             [FromQuery] DateTime? from,

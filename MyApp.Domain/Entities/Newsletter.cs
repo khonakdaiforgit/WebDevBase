@@ -17,7 +17,6 @@ namespace MyApp.Domain.Entities
             SentAt = DateTime.UtcNow;
             SentByUserId = userId;
         }
-
         public void Schedule() => Status = NewsletterStatus.Scheduled;
     }
 }

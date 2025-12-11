@@ -1,29 +1,28 @@
-﻿// File: Controllers/GalleryController.cs
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApp.Application.Abstractions.Galleries.Dtos;
-using MyApp.Application.Common;
+using MyApp.WebMVC.Controllers.Base;
 using MyApp.WebMVC.Extensions;
 using MyApp.WebMVC.Views.Gallery.ViewModels;
-using System.Text.Json;
 
 namespace MyApp.WebMVC.Controllers
 {
     [Authorize]
-    public class GalleryController : Controller
+    public class GalleryController : BaseController
     {
         private readonly IHttpClientFactory _http;
         private readonly IMapper _mapper;
 
-        public GalleryController(IHttpClientFactory http, IMapper mapper)
+        public GalleryController(
+            IHttpClientFactory clientFactory, 
+            IMapper mapper): base(clientFactory)
         {
-            _http = http;
+            _http = clientFactory;
             _mapper = mapper;
         }
 
         private HttpClient Api() => _http.CreateClient("ApiClient").WithJwt(this);
-        private HttpClient PublicApi() => _http.CreateClient("ApiClient");
 
         [AllowAnonymous]
         public async Task<IActionResult> Show()

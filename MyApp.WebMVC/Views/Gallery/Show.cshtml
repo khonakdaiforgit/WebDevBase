@@ -1,25 +1,33 @@
 ﻿@model List<MyApp.WebMVC.Views.Gallery.ViewModels.PublicGalleryItemViewModel>
 @{
     ViewData["Title"] = "Gallery";
-    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <section class="page">
     <div class="container">
-        <h1 class="text-center display-4 mb-5" data-aos="fade-up">Our Gallery</h1>
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h1 class="display-4">Gallery</h1>
+                <p class="lead text-muted">Pearl restaurant located in San Francisco</p>
+            </div>
+        </div>
+
 
         @if (Model.Any())
         {
-            <div class="row g-4">
+            <!-- Grid اینستاگرام‌مانند -->
+            <div class="instagram-gallery">
                 @foreach (var item in Model)
                 {
-                    <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up">
+                    <div class="gallery-item" data-aos="fade-up">
                         <a href="@item.ImageUrl" data-lightbox="gallery" data-title="@item.Caption">
-                            <img src="@item.ImageUrl" class="img-fluid rounded shadow hover-zoom" alt="@item.Caption">
+                            <img src="@item.ImageUrl" alt="@item.Caption" class="gallery-img">
                         </a>
                         @if (!string.IsNullOrEmpty(item.Caption))
                         {
-                            <p class="text-center mt-2 small text-muted">@item.Caption</p>
+                            <div class="caption-overlay">
+                                <p class="caption-text">@item.Caption</p>
+                            </div>
                         }
                     </div>
                 }
@@ -34,17 +42,87 @@
 
 @section Styles {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css">
+
     <style>
-        .hover-zoom {
-            transition: transform .4s;
+        /* گالری اینستاگرام‌مانند */
+        .instagram-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 ستون در دسکتاپ */
+            gap: 8px; /* فاصله کم بین تصاویر */
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-            .hover-zoom:hover {
-                transform: scale(1.05);
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .gallery-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* مهم: تصویر رو کراپ می‌کنه تا مربع بشه */
+            display: block;
+            transition: transform 0.4s ease, filter 0.4s ease;
+        }
+
+        .gallery-item:hover .gallery-img {
+            transform: scale(1.08);
+            filter: brightness(0.85);
+        }
+
+        /* نمایش کپشن روی تصویر هنگام هاور (مثل اینستاگرام) */
+        .caption-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            color: white;
+            padding: 20px 12px 12px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .caption-text {
+            margin: 0;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .gallery-item:hover .caption-overlay {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @@media (max-width: 992px) {
+            .instagram-gallery {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
             }
+        }
+
+        @@media (max-width: 576px) {
+            .instagram-gallery {
+                grid-template-columns: repeat(2, 1fr); /* در موبایل 2 ستون */
+                gap: 4px;
+            }
+        }
     </style>
 }
 
+
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox.min.js"></script>
+    <script>
+        // تنظیم lightbox برای بهتر نمایش دادن کپشن
+        lightbox.option({
+            'albumLabel': 'Image %1 of %2',
+            'fadeDuration': 400,
+            'resizeDuration': 400
+        });
+    </script>
 }

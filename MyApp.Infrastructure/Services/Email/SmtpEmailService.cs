@@ -33,6 +33,6 @@ public class SmtpEmailService : IEmailService
             EnableSsl = _settings.EnableSsl
         };
 
-        await client.SendMailAsync(mail, ct);
+        //await client.SendMailAsync(mail, ct);
     }
 }
