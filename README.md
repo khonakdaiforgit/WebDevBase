@@ -30,7 +30,6 @@ This repository contains the **complete backend + domain layer** written with Cl
 src/
 
 ├── MyApp.Domain/          (Entities, Value Objects, Interfaces, Domain Logic - pure C#)
-
 ├── MyApp.Application/     (DTOs, Service Interfaces, Use Cases - thin layer)
 
 ├── MyApp.Infrastructure/ (MongoDB Generic + Specific Repositories, services)
