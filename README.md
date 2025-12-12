@@ -28,10 +28,15 @@ This repository contains the **complete backend + domain layer** written with Cl
 ## Project Structure (Clean / Onion Architecture)
 
 src/
+
 ├── MyApp.Domain/          (Entities, Value Objects, Interfaces, Domain Logic - pure C#)
+
 ├── MyApp.Application/     (DTOs, Service Interfaces, Use Cases - thin layer)
+
 ├── MyApp.Infrastructure/ (MongoDB Generic + Specific Repositories, services)
+
 ├── MyApp.API/             (Controllers, Middleware, Swagger, Program.cs)
+
 └── MyApp.WebMVC/          (MVC site + Admin panel - ViewModel-based)
 
 
