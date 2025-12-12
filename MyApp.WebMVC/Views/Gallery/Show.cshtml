@@ -20,8 +20,8 @@
                 @foreach (var item in Model)
                 {
                     <div class="gallery-item" data-aos="fade-up">
-                        <a href="@item.ImageUrl" data-lightbox="gallery" data-title="@item.Caption">
-                            <img src="@item.ImageUrl" alt="@item.Caption" class="gallery-img">
+                        <a href="@item.ImageUrl" data-lightbox="gallery" data-title="@item.Caption" target="_blank">
+                            <img src="@item.ImageUrl"  alt="@item.Caption" class="gallery-img">
                         </a>
                         @if (!string.IsNullOrEmpty(item.Caption))
                         {

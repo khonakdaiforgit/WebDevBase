@@ -26,7 +26,7 @@ namespace MyApp.WebMVC.Controllers.Base
             {
                 if (DateTime.UtcNow > _cacheExpiry || _cachedLayoutData == null)
                 {
-                    var publicDto = await PublicApi().GetFromJsonAsync<PublicRestaurantDto>("api/public/info");
+                    var publicDto = await PublicApi().GetFromJsonAsync<PublicRestaurantDto>("api/restaurant/info");
 
                     _cachedLayoutData = new SharedLayoutViewModel
                     {

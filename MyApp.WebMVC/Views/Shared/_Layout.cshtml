@@ -8,7 +8,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] - Pearl</title>
+    <title>@ViewData["Title"] - @layoutData.RestaurantName</title>
 
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -84,7 +84,7 @@
             <div class="row gy-5">
                 <!-- Left: Info -->
                 <div class="col-lg-4">
-                    <h4 class="mb-3 text-primary">@layoutData.RestaurantName</h4>
+                    <h4 class="mb-3">@layoutData.RestaurantName</h4>
 
                     <p class="mb-2">
                         @layoutData.FullAddress<br>
@@ -95,11 +95,11 @@
                         @layoutData.TodayHoursDisplay
                         @if (layoutData.IsOpenNow)
                         {
-                            <span class="badge bg-success ms-2 small">Open Now</span>
+                            <span class="badge ms-2 small">Open Now</span>
                         }
                         else
                         {
-                            <span class="badge bg-danger ms-2 small">Closed</span>
+                            <span class="badge ms-2 small">Closed</span>
                         }
                     </p>
 
@@ -110,6 +110,18 @@
                         <i class="fas fa-map-marker-alt"></i>
                         View on Google Maps
                     </a>
+                </div>
+
+                <div class="col-lg-4">
+                    <h5 class="mb-3">Connect</h5>
+                    <div class="d-flex justify-content-center gap-4">
+                        <a href="https://www.yelp.com/biz/pearl-san-francisco" target="_blank" class="text-white hover:text-primary transition">
+                            <i class="fab fa-yelp fa-2x"></i>
+                        </a>
+                        <a href="https://www.instagram.com/pearl_6101/" target="_blank" class="text-white hover:text-primary transition">
+                            <i class="fab fa-instagram fa-2x"></i>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Center: Newsletter -->
@@ -127,7 +139,7 @@
                                placeholder="your@email.com"
                                required
                                autocomplete="email" />
-                        <button type="submit" class="btn btn-primary px-4">
+                        <button type="submit" class="btn btn-secondary px-4">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </form>
@@ -135,17 +147,6 @@
                     <div id="newsletterFooterMessage" class="mt-3 small"></div>
                 </div>
 
-                <div class="col-lg-4">
-                    <h5 class="mb-3">Connect</h5>
-                    <div class="d-flex justify-content-center gap-4">
-                        <a href="https://www.yelp.com/biz/pearl-san-francisco" target="_blank" class="text-white hover:text-primary transition">
-                            <i class="fab fa-yelp fa-2x"></i>
-                        </a>
-                        <a href="https://www.instagram.com/pearl_6101/" target="_blank" class="text-white hover:text-primary transition">
-                            <i class="fab fa-instagram fa-2x"></i>
-                        </a>
-                    </div>
-                </div>
 
             </div>
 

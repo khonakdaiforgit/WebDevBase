@@ -26,7 +26,7 @@ namespace MyApp.WebMVC.Controllers
         public async Task<IActionResult> Index()
         {
             
-            var dto = await PublicApi().GetFromJsonAsync<PublicRestaurantDto>("api/public/info");
+            var dto = await PublicApi().GetFromJsonAsync<PublicRestaurantDto>("api/restaurant/info");
 
             var viewModel = dto is not null
                 ? _mapper.Map<HomeIndexViewModel>(dto)
@@ -39,14 +39,6 @@ namespace MyApp.WebMVC.Controllers
         [HttpGet]
         public IActionResult Contact()
         {
-            //var dto = await PublicApi().GetFromJsonAsync<PublicRestaurantDto>("api/public/info");
-
-            //var restaurantInfo = dto is not null
-            //    ? _mapper.Map<HomeIndexViewModel>(dto)
-            //    : new HomeIndexViewModel { RestaurantName = "Pearl" };
-
-            //ViewBag.rsturantInfo= restaurantInfo;
-
             return View(new ContactViewModel());
         }
 

@@ -39,6 +39,17 @@ namespace MyApp.WebAPI.Controllers
             return Ok(restaurant);
         }
 
+        [AllowAnonymous]
+        [HttpGet("info")]
+        [ResponseCache(Duration = 60)]
+        public async Task<ActionResult<PublicRestaurantDto>> GetPublicInfo()
+        {
+            var restaurant = await _restaurantService.GetPublicInfo(); // یا بر اساس دامنه
+            if (restaurant == null) return NotFound();
+
+            return Ok(restaurant);
+        }
+
         // بقیه اندپوینت‌ها (اختیاری برای آینده)
         [HttpPost]
         public async Task<ActionResult<Guid>> Create([FromBody] CreateRestaurantDto dto)

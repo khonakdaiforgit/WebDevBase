@@ -9,7 +9,7 @@
         <p class="lead fs-3 mb-4">Modern Cuisine • Cozy Ambience • Unforgettable Taste</p>
 
         <div class="mb-5">
-            <span class="badge @Model.StatusBadgeClass fs-5 px-5 py-3 shadow-lg">
+            <span class="badge fs-5 px-5 py-3 shadow-lg" style="font-weight:normal">
                 <i class="fas fa-circle fa-beat-fade me-2"></i>
                 <strong>@Model.StatusText</strong>
                 <small class="d-block mt-1 opacity-75">Today: @Model.TodayHoursDisplay</small>
@@ -17,8 +17,14 @@
         </div>
 
         <div>
-            <a href="#menu" class="btn btn-danger btn-lg px-5 py-3 me-3">View Menu</a>
-            <a href="#contact" class="btn btn-outline-light btn-lg px-5 py-3">Reserve Table</a>
+            <a asp-controller="Menu" asp-action="Show" class="btn btn-outline-light btn-lg px-5 py-3 me-3">View Menu</a>
+            <a asp-action="Contact" class="btn btn-outline-light btn-lg px-5 py-3">Reserve Table</a>
         </div>
     </div>
 </section>
+<div class="container">
+    <div class="row text-center py-5">
+        <p class="display-5">California inspired Mediterranean cooking with drinks to match from San Francisco natives and industry professionals</p>
+        <p><a id="resyButton-4qry7w4i" href="https://resy.com/cities/sf/pearl">Book your Pearl reservation on Resy</a></p>
+    </div>
+</div>
