@@ -51,5 +51,5 @@ src/
 
 ## Admin User
 
-- **Username: admin@restaurantapp.com
-- **Password: admin@123! (hashed with BCrypt in the database)**
+- Username: admin@restaurantapp.com
+- Password: admin@123! (hashed with BCrypt in the database)
