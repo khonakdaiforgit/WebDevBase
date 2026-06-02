@@ -47,3 +47,9 @@ src/
 | Database               | MongoDB                                    |
 | Repository Pattern     | Generic + Specific Repositories            |
 | Authentication         | JWT + Refresh Tokens (ready)               |
+
+
+## Admin User
+
+- **Username: admin@restaurantapp.com
+- **Password: admin@123! (hashed with BCrypt in the database)**
