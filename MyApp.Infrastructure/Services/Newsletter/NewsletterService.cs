@@ -94,10 +94,10 @@ namespace MyApp.Infrastructure.Services.Newsletter
 
 
             var tasks = subscribers.Select(email =>
-            _emailService.SendAsync(
-                to: email.Email,
-                subject: newsletter.Subject,
-                htmlBody: newsletter.Content // فرض می‌کنیم محتوا قبلاً HTML امن هست
+                _emailService.SendAsync(
+                    to: email.Email,
+                    subject: newsletter.Subject,
+                    htmlBody: newsletter.Content // فرض می‌کنیم محتوا قبلاً HTML امن هست
             ));
 
             await Task.WhenAll(tasks);

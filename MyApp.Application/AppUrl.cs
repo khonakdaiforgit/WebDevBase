@@ -12,7 +12,7 @@ namespace MyApp.Application
         {
             var url = "https://localhost:5100/";
 #if !DEBUG
-            url= "https://localhost:5001/";
+            url= "http://restaurantcmsapi.runasp.net/";
 #endif
             return url;
         }

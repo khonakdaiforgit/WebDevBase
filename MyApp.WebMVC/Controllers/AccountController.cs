@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using MyApp.WebMVC.Models.ViewModels;
 using System.Text;
 using System.Text.Json;
-using static System.Net.WebRequestMethods;
 
 namespace MyApp.WebMVC.Controllers
 {
@@ -45,7 +44,7 @@ namespace MyApp.WebMVC.Controllers
                 Response.Cookies.Append("access_token", result!.AccessToken, new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true,
+                    //Secure = true,
                     SameSite = SameSiteMode.Strict,
                     Expires = result.ExpiresAt
                 });
@@ -53,7 +52,7 @@ namespace MyApp.WebMVC.Controllers
                 Response.Cookies.Append("refresh_token", result.RefreshToken, new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true,
+                    //Secure = true,
                     SameSite = SameSiteMode.Strict,
                     Expires = DateTimeOffset.UtcNow.AddDays(30)
                 });
